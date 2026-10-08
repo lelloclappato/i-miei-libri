@@ -1,0 +1,24 @@
+{
+  "id": "./",
+  "name": "I miei libri",
+  "short_name": "Libri",
+  "description": "I libri che leggo: liste, riassunti capitolo per capitolo, parole nuove da ripassare, citazioni e statistiche. I dati restano sul tuo telefono.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e3eaf1",
+  "theme_color": "#e3eaf1",
+  "categories": ["books", "education", "productivity"],
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Parola nuova", "short_name": "Parola", "url": "./?azione=parola"},
+    {"name": "Libreria", "url": "./#/libreria"}
+  ]
+}

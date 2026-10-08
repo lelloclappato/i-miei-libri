@@ -1,0 +1,508 @@
+/* ==========================================================================
+   I miei libri – stile
+   Idea: carta da zucchero (l'azzurro-grigio della carta che avvolgeva lo zucchero),
+   inchiostro blu, il rosso del nastro segnalibro e il giallo dell'evidenziatore.
+   Il rosso si usa quasi solo per il nastro che segna a che punto sei; il giallo
+   solo per le parole nuove: così quando compaiono vogliono dire sempre la stessa cosa.
+   Tutti i colori sono variabili qui in cima, in versione chiara e scura.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Literata';
+  src: url('../fonts/literata-latin-variabile.woff2') format('woff2');
+  font-weight: 200 900; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Literata';
+  src: url('../fonts/literata-latin-variabile-corsivo.woff2') format('woff2');
+  font-weight: 200 900; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('../fonts/instrument-sans-latin-variabile.woff2') format('woff2');
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* colori – tema chiaro */
+  --carta: #e3eaf1;         /* sfondo: carta da zucchero */
+  --foglio: #f8fafc;        /* schede e pannelli */
+  --incavo: #edf1f6;        /* campi e zone rientrate dentro una scheda */
+  --inchiostro: #14213d;    /* testo e pulsanti principali */
+  --tenue: #4a5771;         /* testo secondario */
+  --linea: #c3cedb;         /* bordi */
+  --linea-forte: #6b7b93;   /* bordi dei campi (devono vedersi bene) */
+  --nastro: #b3203a;        /* il segnalibro */
+  --nastro-tenue: #f7dfe3;
+  --evidenziatore: #ffdf5e; /* parole nuove */
+  --su-evidenziatore: #14213d; /* testo sopra il giallo */
+  --pagina: #ffffff;        /* il taglio delle pagine nella barra di avanzamento */
+  --pagina-riga: #b9c5d4;
+  --letto: #2a4170;         /* pagine già lette nella barra */
+  --letto-riga: #14213d;
+  --att-0: #d3dce7; --att-1: #a9bbd3; --att-2: #7590b8; --att-3: #44629a; --att-4: #14213d; /* griglia dell'attività */
+  --velo: rgba(20, 33, 61, .45);
+
+  /* caratteri */
+  --titoli: 'Literata', Georgia, 'Times New Roman', serif;
+  --testo: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* misure */
+  --raggio: 14px;
+  --raggio-piccolo: 9px;
+  --barra-schede: 64px;
+  --largo: 640px;
+
+  color-scheme: light;
+}
+
+/* tema scuro: automatico se il telefono è in modalità scura (e non hai scelto "chiaro")… */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="chiaro"]) {
+    --carta: #0d1422; --foglio: #161f33; --incavo: #1e2940; --inchiostro: #e7edf5; --tenue: #a7b4c8;
+    --linea: #2b3852; --linea-forte: #64738e; --nastro: #f4718a; --nastro-tenue: #3b1c28; --evidenziatore: #7a6210; --su-evidenziatore: #ffffff;
+    --pagina: #3a4763; --pagina-riga: #1e2940; --letto: #c9d6ea; --letto-riga: #8fa3c4;
+    --att-0: #1e2940; --att-1: #33466b; --att-2: #4f6a9b; --att-3: #8aa4d1; --att-4: #e7edf5;
+    --velo: rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+/* …oppure scelto a mano in Altro */
+:root[data-tema="scuro"] {
+  --carta: #0d1422; --foglio: #161f33; --incavo: #1e2940; --inchiostro: #e7edf5; --tenue: #a7b4c8;
+  --linea: #2b3852; --linea-forte: #64738e; --nastro: #f4718a; --nastro-tenue: #3b1c28; --evidenziatore: #7a6210; --su-evidenziatore: #ffffff;
+  --pagina: #3a4763; --pagina-riga: #1e2940; --letto: #c9d6ea; --letto-riga: #8fa3c4;
+  --att-0: #1e2940; --att-1: #33466b; --att-2: #4f6a9b; --att-3: #8aa4d1; --att-4: #e7edf5;
+  --velo: rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--carta);
+  color: var(--inchiostro);
+  font: 400 16px/1.5 var(--testo);
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3, p, ul, ol, dl, dd, figure, blockquote { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+[hidden] { display: none !important; }
+
+/* il contorno quando ci si sposta con la tastiera */
+:focus-visible { outline: 3px solid var(--inchiostro); outline-offset: 2px; border-radius: 4px; }
+:focus:not(:focus-visible) { outline: none; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+#app {
+  max-width: var(--largo);
+  margin: 0 auto;
+  padding: calc(18px + env(safe-area-inset-top)) 16px calc(var(--barra-schede) + 40px + env(safe-area-inset-bottom));
+  min-height: 100vh; min-height: 100dvh;
+}
+#app:focus { outline: none; }
+/* con il cronometro acceso c'è una striscia in più sopra la barra delle schede */
+body.con-timer #app { padding-bottom: calc(var(--barra-schede) + 100px + env(safe-area-inset-bottom)); }
+
+/* ---------- testi ---------- */
+.titolo-pagina { font: 600 30px/1.15 var(--titoli); letter-spacing: -.01em; }
+.titolo-sezione { font: 600 20px/1.25 var(--titoli); }
+.titolo-scheda { font: 600 18px/1.3 var(--titoli); }
+.tenue { color: var(--tenue); }
+.piccolo { font-size: 14px; line-height: 1.45; }
+.numero { font-variant-numeric: tabular-nums; }
+/* testo da leggere con calma: riassunti, recensioni */
+.lettura { font: 400 17px/1.65 var(--titoli); }
+.lettura p + p { margin-top: .8em; }
+
+.testata { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 12px; margin-bottom: 18px; }
+.testata .tenue { display: block; margin-bottom: 2px; }
+.sezione { margin-top: 28px; }
+.sezione > .titolo-sezione { margin-bottom: 12px; }
+.riga-titolo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+
+/* ---------- pulsanti ---------- */
+.bottone {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 10px 18px;
+  border: 1.5px solid var(--inchiostro); border-radius: 999px;
+  background: var(--inchiostro); color: var(--carta);
+  font-weight: 600; font-size: 16px; line-height: 1.2; text-decoration: none; text-align: center;
+}
+.bottone .icona { width: 20px; height: 20px; flex: none; }
+.bottone:active { transform: translateY(1px); }
+.bottone[disabled] { opacity: .45; cursor: default; }
+.bottone--secondario { background: transparent; color: var(--inchiostro); }
+.bottone--largo { width: 100%; }
+.bottone--piccolo { min-height: 40px; padding: 6px 14px; font-size: 15px; }
+.bottone--nastro { background: var(--nastro); border-color: var(--nastro); color: #fff; }
+:root[data-tema="scuro"] .bottone--nastro { color: #1a0a10; }
+@media (prefers-color-scheme: dark) { :root:not([data-tema="chiaro"]) .bottone--nastro { color: #1a0a10; } }
+
+/* pulsante che sembra un collegamento */
+.bottone-testo {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 8px 4px; border: 0; background: none;
+  font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;
+}
+.bottone-testo .icona { width: 18px; height: 18px; }
+.bottone-testo--pericolo { color: var(--nastro); }
+
+/* pulsante rotondo con solo l'icona */
+.tonda {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1.5px solid var(--linea); background: var(--foglio); color: var(--inchiostro);
+}
+.tonda .icona { width: 20px; height: 20px; }
+.tonda--nuda { border-color: transparent; background: transparent; }
+
+.azioni { display: flex; flex-wrap: wrap; gap: 10px; }
+/* due pulsanti stanno affiancati se ci stanno su una riga; altrimenti vanno uno sotto l'altro, larghi tutti e due */
+.azioni > .bottone { flex: 1 1 auto; white-space: nowrap; }
+.azioni-testo { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+
+/* ---------- schede ---------- */
+.scheda { background: var(--foglio); border: 1px solid var(--linea); border-radius: var(--raggio); padding: 16px; }
+.scheda + .scheda { margin-top: 12px; }
+.scheda.sezione { margin-top: 12px; }
+.scheda--piatta { background: transparent; border-style: dashed; border-color: var(--linea-forte); }
+
+/* schermata vuota: un invito a fare la prima cosa */
+.vuoto { padding: 28px 18px; text-align: center; border: 1.5px dashed var(--linea-forte); border-radius: var(--raggio); }
+.vuoto .titolo-scheda { margin-bottom: 6px; }
+.vuoto p { color: var(--tenue); max-width: 34ch; margin: 0 auto; }
+.vuoto .bottone { margin-top: 16px; }
+
+/* ---------- copertina ---------- */
+/* Sotto c'è sempre una copertina disegnata (tinta + titolo); se esiste l'immagine vera, le sta sopra. */
+.copertina {
+  position: relative; display: block; flex: none; overflow: hidden;
+  width: 64px; aspect-ratio: 2 / 3; border-radius: 3px 6px 6px 3px; container-type: inline-size;
+  background: var(--tinta, #1f3a6e); color: #f8fafc;
+  box-shadow: inset 4px 0 0 rgba(0, 0, 0, .18), 0 1px 0 rgba(20, 33, 61, .25);
+}
+.copertina img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.copertina-testo { position: absolute; inset: 9% 8% 9% 14%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+/* Il testo si misura sulla larghezza della copertina (unità "cqw"), così è proporzionato in tutte le misure.
+   --s lo rimpicciolisce quando il titolo ha una parola lunga, che altrimenti verrebbe spezzata (vedi copertina() in comune.js). */
+.copertina-testo b { font: 600 11px/1.15 var(--titoli); font-size: calc(17.5cqw * var(--s, 1)); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5; overflow: hidden; }
+.copertina-testo i { font: 400 8px/1.2 var(--testo); font-size: 12cqw; font-style: normal; opacity: .85; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.copertina--s { width: 48px; }
+.copertina--s .copertina-testo i { display: none; }
+.copertina--l { width: 108px; }
+.tinta-0 { --tinta: #1f3a6e; } .tinta-1 { --tinta: #9a2940; } .tinta-2 { --tinta: #2c5a4c; } .tinta-3 { --tinta: #7f5a12; }
+.tinta-4 { --tinta: #5b3a6b; } .tinta-5 { --tinta: #1c5c68; } .tinta-6 { --tinta: #3d4558; }
+
+/* ---------- il nastro: la barra di avanzamento ---------- */
+/* Il blocco delle pagine visto di taglio: a sinistra quelle lette, a destra quelle da leggere,
+   e il nastro rosso del segnalibro che pende nel punto in cui sei arrivato. */
+.blocco { position: relative; height: 16px; margin: 4px 0 18px; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--pagina) 0 3px, var(--pagina-riga) 3px 4px); }
+.blocco::before { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); border-radius: 2px 0 0 2px;
+  background: repeating-linear-gradient(90deg, var(--letto) 0 3px, var(--letto-riga) 3px 4px); }
+.blocco::after { content: ''; position: absolute; top: -3px; left: clamp(0px, calc(var(--p, 0%) - 5px), calc(100% - 10px)); width: 10px; height: 34px;
+  background: var(--nastro); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); }
+.blocco--fermo::after { display: none; } /* libro non iniziato o di cui non si sanno le pagine */
+.avanzamento { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 15px; }
+.avanzamento b { font: 700 22px/1 var(--testo); }
+
+/* ---------- libro in lettura (Oggi) ---------- */
+.in-lettura { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; }
+/* un titolo con una parola lunghissima va a capo dentro la parola, invece di allargare la pagina */
+.in-lettura h2, .libro-testa h1, .riga-libro h3, .lettura-ora h1, .voce .parola, .risultato b, .capitolo h3 { overflow-wrap: anywhere; }
+.in-lettura h2 { font: 600 22px/1.2 var(--titoli); }
+.in-lettura .autore { color: var(--tenue); margin-top: 2px; }
+.in-lettura a { text-decoration: none; }
+.in-lettura-sotto { grid-column: 1 / -1; }
+.stima { margin-top: -6px; color: var(--tenue); font-size: 14.5px; }
+
+/* tre azioni veloci: riassunto, parola, citazione */
+.veloci { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.veloce { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 68px; padding: 10px 4px;
+  border: 1.5px solid var(--linea); border-radius: var(--raggio-piccolo); background: var(--foglio); font-size: 14px; font-weight: 600; line-height: 1.2; }
+.veloce .icona { width: 20px; height: 20px; }
+
+/* ---------- elenco di libri ---------- */
+.riga-libro { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--linea); text-decoration: none; }
+.riga-libro:last-child { border-bottom: 0; }
+.riga-libro h3 { font: 600 17px/1.25 var(--titoli); }
+.riga-libro .autore { color: var(--tenue); font-size: 15px; }
+.riga-libro .dettaglio { color: var(--tenue); font-size: 14px; margin-top: 3px; }
+.riga-libro > .icona { width: 18px; height: 18px; color: var(--tenue); }
+.mini-blocco { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--att-0); position: relative; max-width: 220px; }
+.mini-blocco::before { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); background: var(--nastro); border-radius: 3px; }
+
+/* ---------- scelta a segmenti (liste della libreria, sezioni del libro…) ---------- */
+/* La riga scorre di lato quando le voci non ci stanno tutte: il bordo destro sfuma, per far capire che continua
+   (render() in comune.js porta sempre in vista la voce scelta). */
+.segmenti { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px 14px; padding: 2px 40px 6px 16px; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+.segmenti::-webkit-scrollbar { display: none; }
+.segmento { flex: none; min-height: 40px; padding: 6px 14px; border: 1.5px solid var(--linea-forte); border-radius: 999px; background: transparent; font-weight: 600; font-size: 15px; white-space: nowrap; }
+.segmento[aria-pressed="true"], .segmento[aria-selected="true"] { background: var(--inchiostro); border-color: var(--inchiostro); color: var(--carta); }
+.segmento .numero { font-weight: 400; opacity: .8; margin-left: 4px; }
+
+/* ---------- campi dei moduli ---------- */
+.campo { display: block; margin-bottom: 14px; }
+.campo > span, .etichetta { display: block; font-weight: 600; font-size: 15px; margin-bottom: 5px; }
+.campo > small, .aiuto { display: block; color: var(--tenue); font-size: 14px; margin-top: 4px; }
+.campo input, .campo select, .campo textarea, .cerca input {
+  width: 100%; min-height: 48px; padding: 10px 12px;
+  border: 1.5px solid var(--linea-forte); border-radius: var(--raggio-piccolo);
+  background: var(--foglio); color: var(--inchiostro);
+}
+.pannello .campo input, .pannello .campo select, .pannello .campo textarea { background: var(--incavo); }
+.campo textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+.campo textarea.lettura { min-height: 240px; font: 400 17px/1.6 var(--titoli); }
+.campo input:focus, .campo select:focus, .campo textarea:focus, .cerca input:focus { outline: 3px solid var(--inchiostro); outline-offset: 1px; }
+.campo input::placeholder, .campo textarea::placeholder, .cerca input::placeholder { color: var(--tenue); opacity: 1; }
+fieldset.campo { border: 0; padding: 0; margin-inline: 0; min-width: 0; }
+fieldset.campo legend { padding: 0; }
+.campi-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.campi-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.errore { color: var(--nastro); font-weight: 600; font-size: 15px; margin: -6px 0 12px; }
+
+.cerca { position: relative; margin-bottom: 12px; }
+.cerca .icona { position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; margin-top: -9px; color: var(--tenue); pointer-events: none; }
+.cerca input { padding-left: 42px; border-radius: 999px; }
+
+/* scelta tra poche opzioni, una sola attiva (lista del libro, tema…) */
+.scelte { display: flex; flex-wrap: wrap; gap: 8px; }
+.scelta { position: relative; }
+.scelta input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.scelta span { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; border: 1.5px solid var(--linea-forte); border-radius: 999px; font-weight: 600; font-size: 15px; }
+.scelta input:checked + span { background: var(--inchiostro); border-color: var(--inchiostro); color: var(--carta); }
+.scelta input:focus-visible + span { outline: 3px solid var(--inchiostro); outline-offset: 2px; }
+
+/* ---------- stelle ---------- */
+.stelle { display: inline-flex; gap: 2px; vertical-align: middle; }
+.stelle .icona { width: 16px; height: 16px; color: var(--linea-forte); }
+.stelle .piena { color: var(--inchiostro); fill: currentColor; }
+.voto { display: flex; gap: 4px; margin-bottom: 14px; }
+.voto button { width: 48px; height: 48px; border: 0; background: none; padding: 0; color: var(--linea-forte); }
+.voto button .icona { width: 34px; height: 34px; }
+.voto button[aria-pressed="true"] { color: var(--inchiostro); }
+.voto button[aria-pressed="true"] .icona { fill: currentColor; }
+
+/* ---------- pagina del libro ---------- */
+.torna { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; margin: -8px 0 6px -6px; padding: 6px 10px 6px 4px; border: 0; background: none; font-weight: 600; text-decoration: none; }
+.torna .icona { width: 20px; height: 20px; }
+.libro-testa { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: end; margin-bottom: 18px; }
+.libro-testa h1 { font: 600 26px/1.15 var(--titoli); letter-spacing: -.01em; }
+.libro-testa .autore { font-size: 17px; margin-top: 4px; }
+.libro-testa .dettaglio { color: var(--tenue); font-size: 14px; margin-top: 6px; }
+.stato-libro { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stato-libro select { min-height: 44px; padding: 6px 34px 6px 14px; border: 1.5px solid var(--inchiostro); border-radius: 999px; background-color: transparent; font-weight: 600; max-width: 100%; }
+
+/* un capitolo riassunto */
+.capitolo { padding: 16px 0; border-bottom: 1px solid var(--linea); }
+.capitolo:first-child { padding-top: 4px; }
+.capitolo:last-child { border-bottom: 0; }
+.capitolo-testa { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.capitolo h3 { font: 600 19px/1.25 var(--titoli); }
+.capitolo .sopra { color: var(--tenue); font-size: 14px; }
+.capitolo .lettura { margin-top: 8px; white-space: pre-wrap; }
+.capitolo .lettura.accorciato { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; line-clamp: 6; overflow: hidden; }
+.capitolo .da-scrivere { margin-top: 6px; color: var(--tenue); font-style: italic; }
+
+/* ---------- citazioni ---------- */
+.citazione { padding: 16px 0; border-bottom: 1px solid var(--linea); }
+.citazione:last-child { border-bottom: 0; }
+.citazione blockquote { font: italic 400 18px/1.55 var(--titoli); white-space: pre-wrap; }
+.citazione blockquote::before { content: '«'; } .citazione blockquote::after { content: '»'; }
+.citazione .nota { margin-top: 8px; font-size: 15px; }
+.citazione-piede { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; color: var(--tenue); font-size: 14px; }
+.citazione-piede a { font-weight: 600; }
+.citazione-piede .gruppo { display: flex; align-items: center; margin-right: -10px; }
+.tonda[aria-pressed="true"] .icona { fill: var(--nastro); color: var(--nastro); }
+
+/* ---------- parole nuove ---------- */
+/* il tratto di evidenziatore sotto la parola */
+.evid { color: var(--inchiostro); background: linear-gradient(transparent 52%, var(--evidenziatore) 52%, var(--evidenziatore) 92%, transparent 92%); padding: 0 3px; margin: 0 -3px; border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.voce { display: block; width: 100%; padding: 14px 0; border: 0; border-bottom: 1px solid var(--linea); background: none; text-align: left; }
+.voce:last-child { border-bottom: 0; }
+.voce-testa { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.voce-testa .parola { min-width: 0; }
+.voce .parola { font: 600 20px/1.3 var(--titoli); }
+.voce .significato { display: block; margin-top: 4px; }
+.voce .frase { display: block; margin-top: 6px; font: italic 400 16px/1.5 var(--titoli); color: var(--tenue); }
+.voce .dove { display: block; margin-top: 6px; font-size: 14px; color: var(--tenue); }
+/* cinque tacche: quanto bene conosci la parola */
+.tacche { display: inline-flex; gap: 3px; flex: none; }
+.tacche i { width: 6px; height: 14px; border-radius: 2px; background: var(--att-0); }
+.tacche i.su { background: var(--inchiostro); }
+
+/* suggerimenti del dizionario */
+.suggerimenti { margin: -4px 0 14px; padding: 12px; border-radius: var(--raggio-piccolo); background: var(--incavo); }
+.suggerimenti h4 { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--tenue); }
+.suggerimenti h4:not(:first-child) { margin-top: 10px; }
+.suggerimento { display: block; width: 100%; padding: 8px 10px; margin-top: 6px; border: 1.5px solid var(--linea-forte); border-radius: var(--raggio-piccolo); background: var(--foglio); text-align: left; font-size: 15px; line-height: 1.4; }
+
+/* ---------- ripasso a schede ---------- */
+.ripasso { display: flex; flex-direction: column; min-height: min(520px, 70dvh); }
+.ripasso-conto { color: var(--tenue); font-size: 14px; }
+.ripasso-carta { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 24px 4px; text-align: center; }
+.ripasso-carta .parola { font: 600 34px/1.15 var(--titoli); overflow-wrap: anywhere; }
+.ripasso-carta .da { margin-top: 10px; color: var(--tenue); font-size: 15px; }
+.ripasso-retro { margin-top: 22px; text-align: left; }
+.ripasso-retro .significato { font-size: 18px; line-height: 1.5; }
+.ripasso-retro .frase { margin-top: 12px; font: italic 400 17px/1.55 var(--titoli); color: var(--tenue); }
+.ripasso-fine { text-align: center; padding: 28px 0 8px; }
+.ripasso-fine b { display: block; font: 600 26px/1.2 var(--titoli); margin-bottom: 8px; }
+
+/* ---------- Oggi: serie e obiettivo ---------- */
+.due { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 350px) { .due { grid-template-columns: minmax(0, 1fr); } }
+.due > .scheda + .scheda { margin-top: 0; }
+.dato b { display: block; font: 700 30px/1.05 var(--testo); letter-spacing: -.01em; }
+.dato b small { font-size: 16px; font-weight: 600; letter-spacing: 0; }
+.dato span { display: block; color: var(--tenue); font-size: 14px; line-height: 1.35; margin-top: 4px; }
+.giorni { display: flex; justify-content: space-between; gap: 4px; margin-top: 12px; }
+.giorni li { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; color: var(--tenue); }
+.giorni i { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--linea-forte); }
+.giorni .fatto i { background: var(--inchiostro); border-color: var(--inchiostro); }
+.giorni .oggi { color: var(--inchiostro); font-weight: 700; }
+.giorni .futuro i { border-style: dashed; opacity: .6; }
+.barra { height: 8px; margin-top: 12px; border-radius: 4px; background: var(--att-0); position: relative; overflow: hidden; }
+.barra::before { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); background: var(--inchiostro); border-radius: 4px; }
+
+.invito { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.invito p { font-weight: 600; }
+.invito small { display: block; font-weight: 400; color: var(--tenue); font-size: 14px; }
+
+/* ---------- cronometro ---------- */
+.lettura-ora { text-align: center; padding-top: 4px; }
+.lettura-ora .copertina { margin: 0 auto 14px; }
+.lettura-ora h1 { font: 600 22px/1.25 var(--titoli); }
+.tempo { font: 600 68px/1 var(--testo); font-variant-numeric: tabular-nums; letter-spacing: -.02em; margin: 26px 0 6px; }
+.tempo.in-pausa { color: var(--tenue); }
+.lettura-ora .azioni { margin-top: 24px; }
+.lettura-ora .veloci { margin-top: 26px; }
+.striscia-timer {
+  position: fixed; left: 0; right: 0; bottom: calc(var(--barra-schede) + env(safe-area-inset-bottom)); z-index: 5;
+  background: var(--nastro); color: #fff;
+}
+.striscia-timer a { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: var(--largo); margin: 0 auto; min-height: 48px; padding: 8px 16px; text-decoration: none; font-weight: 600; }
+.striscia-timer span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-tema="scuro"] .striscia-timer { color: #1a0a10; }
+@media (prefers-color-scheme: dark) { :root:not([data-tema="chiaro"]) .striscia-timer { color: #1a0a10; } }
+
+/* ---------- statistiche ---------- */
+.anno { display: flex; align-items: center; gap: 6px; }
+.anno b { font: 700 19px/1 var(--testo); min-width: 3.2em; text-align: center; }
+.quattro { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.quattro > .scheda + .scheda { margin-top: 0; }
+/* grafico a colonne: un mese per colonna. Colonne sottili (al massimo 24px), arrotondate in cima,
+   una sola tinta; l'etichetta c'è solo sul mese più alto, gli altri numeri si leggono toccando. */
+.colonne { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; align-items: end; height: 160px; margin-top: 14px; padding-top: 22px; border-bottom: 1px solid var(--linea); }
+.colonna { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; padding: 0; border: 0; background: none; border-radius: 0; }
+.colonna i { display: block; width: 100%; max-width: 24px; border-radius: 4px 4px 0 0; background: var(--att-2); }
+.colonna.massimo i { background: var(--inchiostro); }
+.colonna[aria-pressed="true"] i { background: var(--nastro); }
+.colonna:hover i { opacity: .8; }
+.colonna em { position: absolute; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 12px; font-weight: 600; white-space: nowrap; color: var(--inchiostro); }
+.colonna:nth-child(1) em { left: 0; transform: none; } .colonna:nth-child(12) em { left: auto; right: 0; transform: none; }
+.mesi { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; margin-top: 6px; text-align: center; font-size: 12px; color: var(--tenue); }
+.tabella { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.tabella th, .tabella td { padding: 7px 4px; border-bottom: 1px solid var(--linea); text-align: right; font-weight: 400; }
+.tabella th:first-child { text-align: left; }
+.tabella thead th { font-weight: 600; color: var(--tenue); }
+/* griglia delle ultime settimane: una sola tinta, dal chiaro allo scuro */
+.griglia { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr); gap: 3px; margin-top: 14px; }
+.griglia > * { aspect-ratio: 1; border-radius: 3px; background: var(--att-0); border: 0; padding: 0; min-width: 0; }
+.griglia .l1, .legenda .l1 { background: var(--att-1); } .griglia .l2, .legenda .l2 { background: var(--att-2); }
+.griglia .l3, .legenda .l3 { background: var(--att-3); } .griglia .l4, .legenda .l4 { background: var(--att-4); }
+.griglia .futuro { background: transparent; }
+.griglia [aria-pressed="true"] { outline: 2px solid var(--nastro); outline-offset: 1px; }
+.legenda { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 8px; font-size: 12px; color: var(--tenue); }
+.legenda i { width: 12px; height: 12px; border-radius: 3px; background: var(--att-0); }
+.elenco-dati { margin-top: 4px; }
+.elenco-dati div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--linea); }
+.elenco-dati div:last-child { border-bottom: 0; }
+.elenco-dati dt { color: var(--tenue); }
+.elenco-dati dd { font-weight: 600; text-align: right; }
+
+/* ---------- diario delle letture ---------- */
+.lettura-riga { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--linea); }
+.lettura-riga:last-child { border-bottom: 0; }
+.lettura-riga b { display: block; }
+.lettura-riga span { color: var(--tenue); font-size: 14px; }
+
+/* ---------- barra delle schede in basso ---------- */
+.schede { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--foglio); border-top: 1px solid var(--linea); padding-bottom: env(safe-area-inset-bottom); }
+.schede .dentro { display: grid; grid-template-columns: repeat(5, 1fr); max-width: var(--largo); margin: 0 auto; height: var(--barra-schede); }
+.schede a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--tenue); font-size: 12px; font-weight: 600; text-decoration: none; position: relative; }
+.schede a .icona { width: 22px; height: 22px; }
+.schede a[aria-current="page"] { color: var(--inchiostro); }
+/* la scheda attiva ha un piccolo nastro in cima */
+.schede a[aria-current="page"]::before { content: ''; position: absolute; top: 0; width: 10px; height: 9px; background: var(--nastro); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 60%, 0 100%); }
+.schede .pallino { position: absolute; top: 9px; left: calc(50% + 8px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--evidenziatore); color: var(--su-evidenziatore); font-size: 11px; line-height: 16px; text-align: center; }
+
+/* ---------- pannelli (finestre che salgono dal basso) ---------- */
+dialog { color: var(--inchiostro); }
+.pannello {
+  width: 100%; max-width: var(--largo); max-height: 94dvh;
+  margin: auto auto 0; padding: 0; border: 0; border-radius: 18px 18px 0 0;
+  background: var(--foglio); overflow: hidden;
+}
+.pannello[open] { display: flex; flex-direction: column; }
+.pannello::backdrop { background: var(--velo); }
+.pannello--pieno { height: 100dvh; max-height: 100dvh; border-radius: 0; }
+.pannello-testa { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 10px 10px 18px; border-bottom: 1px solid var(--linea); flex: none; }
+.pannello-testa h2 { font: 600 20px/1.25 var(--titoli); }
+.pannello-corpo { padding: 16px 18px calc(18px + env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain; flex: 1; }
+.pannello-corpo > form > .azioni, .pannello-corpo > .azioni { margin-top: 18px; }
+.pannello--pieno .pannello-corpo > form { display: flex; flex-direction: column; min-height: 100%; }
+.pannello--pieno .campo--cresce { flex: 1; display: flex; flex-direction: column; }
+.pannello--pieno .campo--cresce textarea { flex: 1; }
+@media (min-width: 700px) {
+  .pannello { margin: auto; border-radius: 18px; max-height: 88dvh; }
+  .pannello--pieno { height: 88dvh; }
+}
+/* la piccola finestra di conferma */
+.conferma { width: min(92vw, 400px); padding: 20px; border: 0; border-radius: 16px; background: var(--foglio); }
+.conferma::backdrop { background: var(--velo); }
+.conferma p { margin-bottom: 18px; }
+.conferma .azioni > .bottone { flex: 1 1 110px; white-space: normal; }
+
+/* risultati della ricerca di un libro */
+.risultato { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; width: 100%; padding: 10px 0; border: 0; border-bottom: 1px solid var(--linea); background: none; text-align: left; }
+.risultato:last-child { border-bottom: 0; }
+.risultato b { display: block; font: 600 17px/1.25 var(--titoli); }
+.risultato span { display: block; color: var(--tenue); font-size: 14.5px; }
+.attesa { padding: 22px 0; text-align: center; color: var(--tenue); }
+.scelto { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; margin-bottom: 16px; }
+
+/* ---------- avvisi ---------- */
+#toast { position: fixed; left: 0; right: 0; bottom: calc(var(--barra-schede) + 12px + env(safe-area-inset-bottom)); z-index: 30; display: flex; justify-content: center; padding: 0 12px; pointer-events: none; }
+body.con-timer #toast { bottom: calc(var(--barra-schede) + 62px + env(safe-area-inset-bottom)); }
+.toast { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; max-width: 520px; padding: 12px 16px; border-radius: 12px; background: var(--inchiostro); color: var(--carta); font-weight: 600; pointer-events: auto; }
+.toast button { min-height: 40px; padding: 4px 14px; border: 1.5px solid currentColor; border-radius: 999px; background: none; color: inherit; font-weight: 600; }
+.toast .secondo { border-color: transparent; text-decoration: underline; }
+#aggiornamento { position: fixed; left: 0; right: 0; top: calc(10px + env(safe-area-inset-top)); z-index: 31; display: flex; justify-content: center; padding: 0 12px; pointer-events: none; }
+.nota-avviso .bottone-testo { display: flex; }
+.nota-avviso { padding: 12px 14px; border-radius: var(--raggio-piccolo); background: var(--nastro-tenue); margin-bottom: 14px; font-size: 15px; }
+
+/* ---------- movimento ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .pannello[open] { animation: sale .22s ease-out; }
+  .blocco::before { transition: width .5s ease; }
+  .blocco::after { transition: left .5s ease; }
+  @keyframes sale { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+
+@media (min-width: 560px) {
+  .titolo-pagina { font-size: 34px; }
+  .quattro { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .copertina--l { width: 132px; }
+}

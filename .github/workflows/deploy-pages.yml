@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Prepare site
+        run: |
+          # copia tutto il sito, esclusi i file nascosti (.git, .github), la cartella dist
+          # stessa, i test, le guide e i file di testo .md: così i file nuovi non vanno aggiunti a mano qui
+          mkdir -p dist
+          tar --exclude='./.*' --exclude='./dist' --exclude='./docs' --exclude='./tests' --exclude='*.md' -cf - . | tar -xf - -C dist
+          # versione del service worker = codice del commit: ogni pubblicazione crea una cache nuova
+          sed -i "s/const VERSION = 'dev';/const VERSION = '${GITHUB_SHA::7}';/" dist/sw.js
+          grep -q "const VERSION = '${GITHUB_SHA::7}';" dist/sw.js
+          # controllo: ogni file elencato in sw.js deve esistere, altrimenti l'app non si installerebbe offline
+          for f in $(grep -o "'\./[^']*'" dist/sw.js | tr -d "'" | grep -v '^\./$'); do
+            test -f "dist/$f" || { echo "sw.js elenca $f ma il file non esiste"; exit 1; }
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

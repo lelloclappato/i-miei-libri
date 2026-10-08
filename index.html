@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- colore della barra del browser sul telefono (applicaTema lo cambia se scegli il tema a mano) -->
+<meta name="theme-color" content="#e3eaf1" id="colore-tema">
+<title>I miei libri</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- per iPhone/iPad quando l'app è aggiunta alla schermata Home -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Libri">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="I libri che leggo: liste, riassunti capitolo per capitolo, parole nuove da ripassare, citazioni e statistiche. I dati restano sul tuo telefono.">
+<!-- "preload": il browser scarica subito i font, senza aspettare di leggere il CSS -->
+<link rel="preload" href="fonts/instrument-sans-latin-variabile.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/literata-latin-variabile.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+<!-- il tema scelto a mano si applica subito, prima di disegnare, per non vedere un lampo del tema sbagliato -->
+<script>
+  try { var t = JSON.parse(localStorage.getItem('libri-app-v1')).impostazioni.tema; if (t === 'chiaro' || t === 'scuro') document.documentElement.setAttribute('data-tema', t); } catch (e) {}
+</script>
+</head>
+<body>
+<!-- tabindex="-1": permette di spostare qui il fuoco della tastiera quando cambia schermata -->
+<main id="app" tabindex="-1"></main>
+<!-- striscia del cronometro, quando una lettura è in corso -->
+<div id="striscia"></div>
+<nav class="schede" aria-label="Sezioni"><div class="dentro" id="schede"></div></nav>
+<!-- pannello che sale dal basso e finestra di conferma -->
+<dialog id="pannello" class="pannello" aria-labelledby="pannello-titolo"></dialog>
+<dialog id="conferma" class="conferma" aria-labelledby="conferma-testo"></dialog>
+<!-- avvisi temporanei (es. "Riassunto salvato") e avviso di nuova versione -->
+<div id="toast"></div>
+<div id="aggiornamento"></div>
+<!-- invisibile: i lettori di schermo leggono ad alta voce quello che ci scrive annuncia() -->
+<div id="annuncio" class="sr-only" aria-live="polite"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<noscript><p style="padding:24px;font-family:sans-serif">Per usare I miei libri serve JavaScript attivo nel browser.</p></noscript>
+<!-- type="module": il file può importare funzioni dagli altri file in js/ -->
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
