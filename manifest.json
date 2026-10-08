@@ -19,6 +19,7 @@
   ],
   "shortcuts": [
     {"name": "Parola nuova", "short_name": "Parola", "url": "./?azione=parola"},
+    {"name": "Scansiona un libro", "short_name": "Scansiona", "url": "./?azione=scansiona"},
     {"name": "Libreria", "url": "./#/libreria"}
   ]
 }

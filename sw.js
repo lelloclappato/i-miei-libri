@@ -27,12 +27,14 @@ const FILES = [
   './css/style.css',
   './fonts/instrument-sans-latin-variabile.woff2', './fonts/literata-latin-variabile.woff2', './fonts/literata-latin-variabile-corsivo.woff2',
   './js/app.js', './js/utili.js', './js/deposito.js', './js/dati.js', './js/migrazione.js', './js/validazione.js', './js/calcoli.js',
-  './js/stato.js', './js/icone.js', './js/ricerca.js', './js/dizionario.js', './js/markdown.js', './js/backup.js', './js/pwa.js',
+  './js/stato.js', './js/icone.js', './js/ricerca.js', './js/consigli.js', './js/dizionario.js', './js/markdown.js', './js/backup.js', './js/pwa.js',
   './js/viste/comune.js', './js/viste/elementi.js', './js/viste/oggi.js', './js/viste/libreria.js', './js/viste/libro.js',
   './js/viste/quaderno.js', './js/viste/statistiche.js', './js/viste/lettura.js', './js/viste/altro.js',
   './js/pannelli/pannello.js', './js/pannelli/libro-form.js', './js/pannelli/giudizio.js', './js/pannelli/pagina.js',
-  './js/pannelli/capitolo.js', './js/pannelli/citazione.js', './js/pannelli/parola.js', './js/pannelli/lettura-form.js', './js/pannelli/ripasso.js'
+  './js/pannelli/capitolo.js', './js/pannelli/citazione.js', './js/pannelli/parola.js', './js/pannelli/lettura-form.js', './js/pannelli/ripasso.js', './js/pannelli/scansione.js'
 ];
+// (Il lettore di codici a barre di riserva, in vendor/, non è in elenco: pesa 1 MB e serve solo ai browser
+// che non ne hanno uno loro. Se viene usato, finisce in cache da solo, come gli altri file non in elenco.)
 
 self.addEventListener('install', e => {
   // cache: 'reload' = scarica dalla rete ignorando la cache HTTP del browser, per avere i file nuovi

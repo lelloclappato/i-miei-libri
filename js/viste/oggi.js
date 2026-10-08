@@ -129,7 +129,8 @@ function vista() {
         <div><h3>${esc(l.titolo)}</h3>${l.autore ? `<p class="autore">${esc(l.autore)}</p>` : ''}</div>
         <button type="button" class="bottone bottone--piccolo" data-azione="inizia" data-id="${esc(l.id)}">Inizia</button></li>`).join('')}</ul>
       ${inAttesa.length > 4 ? `<a class="bottone-testo" href="#/libreria" data-azione="vai-lista" data-id="da-leggere">Vedi tutti e ${inAttesa.length}</a>` : ''}
-    </section>` : ''}`;
+    </section>` : ''}
+    ${data.libri.some(l => l.stato === 'letto') ? `<p style="margin-top:12px"><a class="bottone-testo" href="#/libreria" data-azione="vai-lista" data-id="per-te">${icona('scintille')}Cerca un’idea tra i consigli “Per te”</a></p>` : ''}`;
   } else {
     corpo = schedaInLettura(inLettura[0]);
     if (inLettura.length > 1) {

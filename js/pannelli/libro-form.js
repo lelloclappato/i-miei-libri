@@ -10,23 +10,33 @@ import { cercaInRete, comeIsbn, chiaveGoogleRifiutata } from '../ricerca.js';
 import { apriPannello, chiudiPannello, conferma } from './pannello.js';
 import { copertina, render, vai, vaiPoi, avviso, annuncia } from '../viste/comune.js';
 import { apriGiudizio } from './giudizio.js';
+import { apriScansione, puoScansionare } from './scansione.js';
 
 // ---------- passo 1: la ricerca ----------
 
 const AIUTO = '<p class="tenue piccolo">Scrivi il titolo: cerco copertina, autore e numero di pagine. L’ISBN è il numero sotto il codice a barre, sul retro del libro.</p>';
 
-export function apriAggiungiLibro({ lista = null, testo = '' } = {}) {
+// isbnLetto: l'ISBN appena letto con la fotocamera. È quello della TUA copia: resta nella scheda del libro
+// anche se poi lo cerchi per titolo e scegli un risultato (che potrebbe essere un'altra edizione).
+export function apriAggiungiLibro({ lista = null, testo = '', isbnLetto = null } = {}) {
+  const scansione = puoScansionare();
   const corpo = apriPannello({
     titolo: 'Aggiungi un libro',
     corpo: `
       <div class="cerca">${icona('cerca')}
-        <input type="search" id="cerca-rete" value="${esc(testo)}" placeholder="Titolo, autore o ISBN" aria-label="Cerca un libro per titolo, autore o ISBN" autocomplete="off" enterkeyhint="search" autofocus>
+        <input type="search" id="cerca-rete" value="${esc(testo)}" placeholder="Titolo, autore o ISBN" aria-label="Cerca un libro per titolo, autore o ISBN" autocomplete="off" enterkeyhint="search" ${isbnLetto ? '' : 'autofocus'}>
       </div>
+      ${scansione ? `<button type="button" class="bottone bottone--secondario bottone--largo scansiona" id="scansiona" ${isbnLetto ? 'autofocus' : ''}>${icona('codice')}${isbnLetto ? 'Scansiona di nuovo' : 'Scansiona il codice a barre'}</button>` : ''}
       <div id="risultati" aria-live="polite">${AIUTO}</div>
       <button type="button" class="bottone-testo" id="a-mano">${icona('matita')}Scrivilo a mano</button>`
   });
   const campo = corpo.querySelector('#cerca-rete'), zona = corpo.querySelector('#risultati');
   let attesa = null, ricerca = null, trovati = [];
+  // dopo una scansione: se il catalogo trova un libro solo, si va dritti alla scheda (una volta sola)
+  let saltaSeUnico = !!isbnLetto;
+  // Il risultato scelto prende l'ISBN letto se è stato trovato proprio con quello, o se non ne ha uno suo
+  // (un risultato trovato per titolo con il suo ISBN potrebbe essere un altro libro: lì non si tocca).
+  const conIsbn = c => (isbnLetto && (!c.isbn || comeIsbn(campo.value) === isbnLetto) ? { ...c, isbn: isbnLetto } : c);
 
   async function cerca() {
     const q = campo.value.trim();
@@ -40,7 +50,15 @@ export function apriAggiungiLibro({ lista = null, testo = '' } = {}) {
       const { libri, errore } = await cercaInRete(q, { chiaveGoogle: data.impostazioni.chiaveGoogle, segnale: questa.signal });
       if (questa !== ricerca || !zona.isConnected) return; // nel frattempo è partita un'altra ricerca, o il pannello è stato chiuso
       trovati = libri;
+      const dallaScansione = isbnLetto && comeIsbn(q) === isbnLetto;
+      if (saltaSeUnico && dallaScansione && libri.length === 1 && !errore) {
+        saltaSeUnico = false;
+        moduloLibro({ campi: conIsbn(libri[0]), lista, daRicerca: q, isbnLetto });
+        return;
+      }
+      saltaSeUnico = false;
       if (errore) zona.innerHTML = '<p class="nota-avviso">Non riesco a cercare: controlla la connessione. Intanto puoi scriverlo a mano.</p>';
+      else if (!libri.length && dallaScansione) zona.innerHTML = `<p class="nota-avviso">Ho letto l’ISBN ${esc(isbnLetto)}, ma i cataloghi gratuiti non lo conoscono (capita con parecchi libri italiani). Scrivi il titolo qui sopra, oppure aggiungilo a mano: l’ISBN resta segnato.</p>`;
       else if (!libri.length) zona.innerHTML = `<p class="nota-avviso">Nessun libro trovato per “${esc(q)}”. Prova con meno parole, con l’ISBN, oppure scrivilo a mano.</p>`;
       else {
         zona.innerHTML = `<ul>${libri.map((l, i) => {
@@ -64,14 +82,16 @@ export function apriAggiungiLibro({ lista = null, testo = '' } = {}) {
   campo.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); clearTimeout(attesa); cerca(); } });
   zona.addEventListener('click', e => {
     const b = e.target.closest('.risultato');
-    if (b) { if (ricerca) ricerca.abort(); moduloLibro({ campi: trovati[Number(b.dataset.i)], lista, daRicerca: campo.value }); }
+    if (b) { if (ricerca) ricerca.abort(); moduloLibro({ campi: conIsbn(trovati[Number(b.dataset.i)]), lista, daRicerca: campo.value, isbnLetto }); }
   });
   corpo.querySelector('#a-mano').addEventListener('click', () => {
     if (ricerca) ricerca.abort();
     // quello che hai scritto nella ricerca diventa il titolo; se è un ISBN, resta come ISBN del libro
-    const scritto = campo.value.trim(), isbn = comeIsbn(scritto);
-    moduloLibro({ campi: { titolo: isbn || /^[\d\s-]+$/.test(scritto) ? '' : scritto, isbn: isbn || '', origine: 'manuale' }, lista, daRicerca: scritto });
+    const scritto = campo.value.trim(), isbn = comeIsbn(scritto) || isbnLetto;
+    moduloLibro({ campi: { titolo: comeIsbn(scritto) || /^[\d\s-]+$/.test(scritto) ? '' : scritto, isbn: isbn || '', origine: 'manuale' }, lista, daRicerca: scritto, isbnLetto });
   });
+  const bottoneScansione = corpo.querySelector('#scansiona');
+  if (bottoneScansione) bottoneScansione.addEventListener('click', () => { if (ricerca) ricerca.abort(); clearTimeout(attesa); apriScansione({ lista }); });
   if (testo.trim().length >= 3) cerca();
 }
 
@@ -120,7 +140,7 @@ function leggiCampi(form) {
   };
 }
 
-function moduloLibro({ campi, lista, daRicerca }) {
+function moduloLibro({ campi, lista, daRicerca, isbnLetto = null }) {
   const scelta = lista && LISTE_AGGIUNTA.some(([s]) => s === lista) ? lista : 'da-leggere';
   const corpo = apriPannello({
     titolo: 'Aggiungi un libro',
@@ -152,7 +172,7 @@ function moduloLibro({ campi, lista, daRicerca }) {
   // "Finito il" serve solo per un libro già letto, "Sono già a pagina" solo per uno che stai leggendo
   const mostraFinito = () => { campoFinito.hidden = form.elements.stato.value !== 'letto'; campoPagina.hidden = form.elements.stato.value !== 'leggendo'; };
   form.addEventListener('change', mostraFinito); mostraFinito();
-  corpo.querySelector('#indietro').addEventListener('click', () => apriAggiungiLibro({ lista, testo: daRicerca || '' }));
+  corpo.querySelector('#indietro').addEventListener('click', () => apriAggiungiLibro({ lista, testo: daRicerca || '', isbnLetto }));
 
   form.addEventListener('submit', async e => {
     e.preventDefault();

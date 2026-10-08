@@ -348,6 +348,22 @@ test('una parola vuota non si salva; eliminare una parola', () => {
   uguale(D.data.parole.length, 0);
 });
 
+gruppo('Consigli scartati');
+test('"No, grazie": si ricorda, una volta sola, e si può annullare', () => {
+  daCapo();
+  D.scartaConsiglio('OL123W'); D.scartaConsiglio('OL123W'); D.scartaConsiglio('il nome della rosa|umberto eco');
+  uguale(D.data.scartati, ['OL123W', 'il nome della rosa|umberto eco']);
+  D.riprendiConsiglio('OL123W');
+  uguale(D.data.scartati, ['il nome della rosa|umberto eco']);
+  D.dimenticaScartati();
+  uguale(D.data.scartati, []);
+});
+test('chiavi strane non entrano', () => {
+  daCapo();
+  D.scartaConsiglio('<script>'); D.scartaConsiglio(''); D.scartaConsiglio(42);
+  uguale(D.data.scartati, []);
+});
+
 gruppo('Impostazioni');
 test('obiettivo dell’anno: metterlo e toglierlo', () => {
   daCapo();

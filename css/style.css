@@ -506,3 +506,37 @@ body.con-timer #toast { bottom: calc(var(--barra-schede) + 62px + env(safe-area-
   .quattro { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .copertina--l { width: 132px; }
 }
+
+/* ---------- scansione del codice a barre ---------- */
+.scansiona { margin: -2px 0 14px; }
+.mirino { position: relative; overflow: hidden; aspect-ratio: 4 / 3; max-height: 52vh; width: 100%; border-radius: var(--raggio); background: #05080f; }
+.mirino video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* il riquadro in cui mettere il codice: largo e basso, come un codice a barre */
+.mirino-riquadro { position: absolute; left: 12%; right: 12%; top: 30%; bottom: 30%; border-radius: 10px;
+  box-shadow: 0 0 0 100vmax rgba(5, 8, 15, .45); outline: 2px solid rgba(255, 255, 255, .9); }
+/* il filo rosso del segnalibro fa da linea di lettura */
+.mirino-riquadro i { position: absolute; left: 6%; right: 6%; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px;
+  background: #f4718a; box-shadow: 0 0 10px rgba(244, 113, 138, .8); animation: lettura 1.8s ease-in-out infinite alternate; }
+@keyframes lettura { from { transform: translateY(-1100%); } to { transform: translateY(1100%); } }
+@media (prefers-reduced-motion: reduce) { .mirino-riquadro i { animation: none; } }
+.mirino-testo { margin: 12px 0 14px; color: var(--tenue); text-align: center; }
+.mirino-testo.nota-avviso { text-align: left; color: inherit; }
+
+/* ---------- Per te: i consigli ---------- */
+.segmento .icona { width: 16px; height: 16px; margin: -2px 6px 0 0; vertical-align: middle; }
+.consiglio { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; padding: 16px 0; border-bottom: 1px solid var(--linea); }
+.consiglio:last-child { border-bottom: 0; }
+.consiglio .copertina { width: 64px; }
+.consiglio h3 { font: 600 17px/1.25 var(--titoli); overflow-wrap: anywhere; }
+.consiglio .autore { color: var(--tenue); font-size: 15px; }
+.consiglio .motivo { display: flex; gap: 6px; align-items: flex-start; margin-top: 6px; font: italic 400 15px/1.35 var(--titoli); }
+.consiglio .motivo .icona { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--nastro); }
+.consiglio .dettaglio { color: var(--tenue); font-size: 14px; margin-top: 4px; }
+.consiglio .dettaglio a { color: inherit; text-underline-offset: 3px; }
+.consiglio .dettaglio .icona { width: 13px; height: 13px; margin-left: 3px; vertical-align: -1px; }
+.consiglio-azioni { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 10px; }
+.consiglio-azioni .bottone { padding-left: 12px; padding-right: 12px; }
+.consiglio-azioni .bottone .icona { width: 17px; height: 17px; }
+.consiglio-azioni .bottone-testo { color: var(--tenue); font-weight: 500; }
+.piede-consigli { margin-top: 10px; }
+.piede-consigli .bottone-testo { min-height: 36px; padding: 4px 2px; font-size: 14px; }

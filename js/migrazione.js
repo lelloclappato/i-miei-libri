@@ -20,7 +20,8 @@
 //               livello, prossimo, ripassi, errori }],   // livello 0-5 e "prossimo" servono al ripasso
 //   letture: [{ id, libroId, giorno, minuti, da, a, tipo }],  // tipo: 'timer' | 'manuale' | 'pagina'
 //   timer:   null | { libroId, inizio, accumulato, inPausa, giornoInizio, paginaInizio }, // lettura in corso (cronometro)
-//   impostazioni: { obiettivi: { "2026": 12 }, tema: 'auto' | 'chiaro' | 'scuro', chiaveGoogle: '' }
+//   impostazioni: { obiettivi: { "2026": 12 }, tema: 'auto' | 'chiaro' | 'scuro', chiaveGoogle: '' },
+//   scartati: ["OL123W", …]  // consigli a cui hai detto "No, grazie": non vengono più proposti (vedi consigli.js)
 // }
 import { oggi, uid, chiaveValida, piuGiorni } from './utili.js';
 
@@ -51,7 +52,7 @@ export function impostazioniBase() {
 }
 
 export function datiVuoti() {
-  return { version: CURRENT_VERSION, ultimoBackup: null, libri: [], parole: [], letture: [], timer: null, impostazioni: impostazioniBase() };
+  return { version: CURRENT_VERSION, ultimoBackup: null, libri: [], parole: [], letture: [], timer: null, impostazioni: impostazioniBase(), scartati: [] };
 }
 
 // ---------- piccoli aiuti per riparare i campi ----------
@@ -59,6 +60,11 @@ const testo = (v, max = 20000) => (typeof v === 'string' ? v : v === null || v =
 const interoONull = v => (Number.isFinite(v) && v >= 0 ? Math.round(v) : null);
 const giornoONull = v => (chiaveValida(v) ? v : null);
 const oggetto = v => !!v && typeof v === 'object' && !Array.isArray(v);
+// Quanti consigli scartati si ricordano al massimo: oltre, si dimenticano i più vecchi.
+export const MAX_SCARTATI = 1000;
+// Un consiglio scartato si riconosce dalla sua "chiave": il codice dell'opera su Open Library ("OL123W")
+// oppure, se manca, titolo e autore semplificati ("il nome della rosa|umberto eco").
+export const chiaveScartatoValida = v => typeof v === 'string' && /^[a-z0-9 |A-Z_-]{1,200}$/.test(v);
 // Un id va bene solo se è fatto di lettere, cifre, "-" e "_": finisce negli indirizzi (#/libro/…) e nell'HTML.
 // Se non va bene (o manca) se ne crea uno nuovo.
 const idBuono = v => (typeof v === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(v) ? v : uid());
@@ -218,6 +224,7 @@ export function upgrade(d) {
       obiettivi,
       tema: TEMI.includes(imp.tema) ? imp.tema : 'auto',
       chiaveGoogle: testo(imp.chiaveGoogle, 100).trim()
-    }
+    },
+    scartati: [...new Set((Array.isArray(d.scartati) ? d.scartati : []).filter(chiaveScartatoValida))].slice(-MAX_SCARTATI)
   };
 }

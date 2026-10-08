@@ -27,6 +27,16 @@ export function comeIsbn(testo) {
   return /^(97[89]\d{10}|\d{9}[\dX])$/.test(s) ? s : null;
 }
 
+// Il numero letto da un codice a barre è un ISBN? Sul retro dei libri c'è un codice EAN-13 che comincia
+// con 978 o 979; l'ultima cifra è di controllo e permette di scartare una lettura sbagliata.
+// Restituisce l'ISBN (13 cifre) oppure null (altro tipo di codice, o letto male).
+export function isbnDaCodice(valore) {
+  const s = String(valore ?? '').replace(/\D/g, '');
+  if (!/^97[89]\d{10}$/.test(s)) return null;
+  const somma = [...s.slice(0, 12)].reduce((t, c, i) => t + Number(c) * (i % 2 ? 3 : 1), 0);
+  return (10 - (somma % 10)) % 10 === Number(s[12]) ? s : null;
+}
+
 // I cataloghi ogni tanto rispondono con valori inattesi (un numero, un oggetto, niente): queste funzioni
 // accettano solo quello che serve e trasformano il resto in "vuoto", così una voce strana non rompe la ricerca.
 const scritta = v => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '');
@@ -100,7 +110,8 @@ export function unisci(...elenchi) {
 
 // ---------- chiamate in rete ----------
 
-async function scarica(url, segnale) {
+// Scarica un indirizzo e lo legge come JSON (usata anche da consigli.js).
+export async function scarica(url, segnale) {
   // AbortController: permette di interrompere la richiesta se dura troppo o se l'utente ha già scritto altro
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ATTESA_MASSIMA);

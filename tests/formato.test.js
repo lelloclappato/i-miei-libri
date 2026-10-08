@@ -136,6 +136,13 @@ test('upgrade due volte dà lo stesso risultato', () => {
   uguale(upgrade(una), una);
 });
 
+test('consigli scartati: si tengono quelli scritti bene, senza doppioni', () => {
+  const d = upgrade({ libri: [], scartati: ['OL1W', 'OL1W', 'titolo|autore', '<b>', 7, null, 'x'.repeat(300)] });
+  uguale(d.scartati, ['OL1W', 'titolo|autore']);
+  uguale(upgrade({ libri: [] }).scartati, []);
+  uguale(upgrade({ libri: [], scartati: 'OL1W' }).scartati, []);
+});
+
 gruppo('Controllo del backup');
 test('un file qualunque non è un backup', () => {
   vero(!controllaBackup(null).ok);

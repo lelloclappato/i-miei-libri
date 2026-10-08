@@ -6,11 +6,16 @@ come *Le mie abitudini* e *Le Mie Finanze*.
 
 Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-pages)).
 
-## Cosa fa (v1.0)
+## Cosa fa (v1.1)
 
 - **Liste**: *Sto leggendo*, *Da leggere* (li ho già), *Voglio leggere* (la lista dei desideri), *Letti*, *Abbandonati*
 - **Aggiunta veloce**: scrivi titolo, autore o ISBN e l'app cerca copertina, autore, anno e pagine
   (Open Library e Google Books); se non lo trova lo scrivi a mano
+- **Scansione del codice a barre** (novità 1.1): inquadri il codice sul retro del libro con la fotocamera e l'app
+  cerca il libro con quell'ISBN. Se lo trova si apre subito la scheda già compilata
+- **Per te** (novità 1.1): libri consigliati a partire da quelli a cui hai dato un voto alto, da quello che stai
+  leggendo, dai tuoi autori e dai tuoi generi. Ognuno dice perché è lì; con un tocco va in *Voglio leggere*
+  o *Da leggere*, oppure lo scarti e non torna più
 - **Segnalibro**: la pagina a cui sei arrivato, con la barra a forma di blocco di pagine e il nastro rosso.
   Dice quanto ti manca e, se continui così, in che giorno finisci
 - **Riassunto capitolo per capitolo**: un testo per ogni capitolo, con numero, titolo e "fino a pagina".
@@ -35,7 +40,8 @@ Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-
 - **Oggi**: il libro che stai leggendo. *Leggi adesso* avvia il cronometro, *Aggiorna la pagina* sposta il segnalibro.
   Sotto ci sono tre tasti veloci: *Riassunto*, *Parola*, *Citazione*. Più in basso le parole da ripassare,
   la serie di giorni e l'obiettivo dell'anno.
-- **Libreria**: le liste e la ricerca tra i tuoi libri. *Aggiungi* apre la ricerca in rete.
+- **Libreria**: le liste e la ricerca tra i tuoi libri. *Aggiungi* apre la ricerca in rete, con il pulsante
+  *Scansiona il codice a barre*. L'ultima scheda in alto, *Per te*, contiene i consigli.
   Toccando un libro si apre la sua pagina, con le sezioni *Capitoli*, *Parole*, *Citazioni*, *Diario* (le letture)
   e *Scheda* (dati, modifica, esportazione, eliminazione). Il menu *Lista* in alto sposta il libro da una lista all'altra.
 - **Quaderno**: tutte le parole nuove e tutte le citazioni, di tutti i libri. Da qui parte il ripasso.
@@ -43,7 +49,8 @@ Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-
 - **Altro**: obiettivo dell'anno, tema, installazione, backup, vocabolario per Obsidian, chiave di Google Books.
 
 Per installarla sul telefono: apri il sito, poi "Aggiungi a schermata Home" (Android: menu ⋮ di Chrome → "Installa app";
-iPhone: pulsante Condividi in Safari). Tenendo premuta l'icona dell'app compare la scorciatoia **Parola nuova**.
+iPhone: pulsante Condividi in Safari). Tenendo premuta l'icona dell'app compaiono le scorciatoie **Parola nuova**
+e **Scansiona un libro**.
 
 ## Il ripasso delle parole
 
@@ -128,6 +135,41 @@ I nomi dei menu della console di Google cambiano ogni tanto: se non li trovi ugu
 
 Il suggerimento del significato usa il **Wikizionario** italiano (it.wiktionary.org), senza chiavi.
 
+## Scansione del codice a barre
+
+Il codice a barre sul retro di un libro è il suo ISBN: 13 cifre che cominciano con 978 o 979. L'ultima cifra è di
+controllo, quindi una lettura sbagliata viene scartata e la fotocamera continua a cercare. Gli altri codici
+(per esempio quello piccolo del prezzo) vengono ignorati.
+
+- **Chi legge il codice**: Chrome su Android ha un lettore già pronto e l'app usa quello. Negli altri browser
+  (Firefox, Chrome sul computer…) la prima volta si scarica un lettore di riserva di circa 1 MB, che sta in `vendor/`
+  (barcode-detector + zxing-wasm, licenze MIT e Apache 2.0, vedi `vendor/LICENZE.txt`).
+- **Permesso**: la prima volta il telefono chiede di usare la fotocamera. Se dici di no, l'app spiega come
+  cambiare idea e intanto puoi scrivere l'ISBN a mano.
+- **Luce**: se il telefono lo permette, compare il pulsante *Luce* per accendere il flash.
+- **Libro non trovato**: molti libri italiani non sono nei cataloghi gratuiti. L'ISBN letto resta comunque nella
+  scheda, anche se poi aggiungi il libro a mano o lo cerchi per titolo (se il risultato scelto non ha un ISBN suo).
+
+## Per te: come nascono i consigli
+
+Tutto succede sul telefono, con il catalogo gratuito di Open Library. Nessun dato tuo viene mandato altrove:
+partono solo le ricerche (titoli, autori, generi).
+
+1. Si guardano i tuoi libri: contano di più quelli finiti con 4-5 stelle e quello che stai leggendo. Quelli con
+   1-2 stelle o abbandonati contano "contro": i loro autori non vengono consigliati. Se non hai ancora finito niente,
+   si parte da *Da leggere* e *Voglio leggere*.
+2. Per ognuno si chiede a Open Library chi l'ha scritto e di cosa parla (i "soggetti": fantasy, gialli, Medioevo…).
+   Conta anche il genere che hai scritto nella scheda. Le risposte restano da parte per due mesi.
+3. Si cercano altri libri dei tuoi autori preferiti (fino a 3) e altri libri con i generi e gli argomenti che
+   tornano più spesso (fino a 4). Si considerano solo i libri usciti anche in italiano, i più letti per primi.
+4. Un libro trovato da più ricerche sale in classifica. Al massimo due libri per autore. Spariscono quelli che hai
+   già e quelli scartati.
+
+I consigli si rifanno da soli dopo una settimana, quando cambia un voto o finisci un libro, oppure con *Aggiorna*.
+Open Library non ama troppe richieste ravvicinate: ogni aggiornamento ne fa una dozzina, una alla volta.
+Se non risponde restano i consigli dell'ultima volta. I libri scartati sono salvati nei dati, quindi anche nel
+backup; *Riproponili*, in fondo all'elenco, li fa tornare.
+
 ## Provarla sul computer
 
 I moduli JavaScript non funzionano aprendo `index.html` con un doppio clic: serve un piccolo server locale.
@@ -139,7 +181,7 @@ python3 -m http.server 8000
 
 poi apri http://localhost:8000 nel browser.
 
-**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 174 test con dati inventati (conti, formato dei dati,
+**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 193 test con dati inventati (conti, formato dei dati, scansione, consigli,
 controllo dei backup, lettura delle risposte dei cataloghi e del dizionario, esportazione in Markdown, operazioni sui dati)
 e mostra in verde quelli superati e in rosso quelli falliti. I test salvano i loro dati di prova sotto un nome a parte
 (`libri-app-PROVA`): i tuoi libri non vengono toccati. Da riaprire dopo ogni modifica ai file in `js/`.
@@ -176,7 +218,8 @@ cancellata da fuori, alla prima apertura con internet riscarica tutto da sola.
   - `migrazione.js`: il formato dei dati (descritto in cima al file) e la riparazione di dati incompleti
   - `validazione.js`: controllo dei file di backup
   - `calcoli.js`: avanzamento, serie, statistiche, stime, ripasso (funzioni "pure", testate)
-  - `ricerca.js`: ricerca dei libri su Open Library e Google Books
+  - `ricerca.js`: ricerca dei libri su Open Library e Google Books (e lettura dell'ISBN dal codice a barre)
+  - `consigli.js`: i consigli "Per te"
   - `dizionario.js`: suggerimento del significato dal Wikizionario
   - `markdown.js`: esportazione per Obsidian
   - `backup.js`: esporta e importa il file JSON
@@ -191,7 +234,8 @@ cancellata da fuori, alla prima apertura con internet riscarica tutto da sola.
     - `pannello.js`: apertura, chiusura e finestra di conferma
     - `libro-form.js` (aggiungi e modifica un libro), `pagina.js` (segnalibro e obiettivo), `capitolo.js`,
       `parola.js`, `citazione.js`, `lettura-form.js` (fine lettura e lettura a mano), `giudizio.js` (voto e pensieri),
-      `ripasso.js`
+      `ripasso.js`, `scansione.js` (fotocamera e codice a barre)
+- `vendor/`: il lettore di codici a barre di riserva, per i browser che non ne hanno uno (con le licenze)
 - `sw.js`, `manifest.json`, `icon-*.png`: installazione e funzionamento offline
 - `tests/`: i test (`test.html` da aprire nel browser)
 - `.github/workflows/deploy-pages.yml`: pubblicazione su GitHub Pages

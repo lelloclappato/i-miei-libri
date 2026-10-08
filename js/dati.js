@@ -4,7 +4,7 @@
 // chiamano le funzioni di questo file, così le regole stanno in un posto solo.
 import { deposito } from './deposito.js';
 import { oggi, uid, piuGiorni } from './utili.js';
-import { upgrade, datiVuoti, CURRENT_VERSION, STATI, ripulisciLibro, ripulisciCapitolo, ripulisciCitazione, ripulisciParola, ripulisciLettura, TEMI } from './migrazione.js';
+import { upgrade, datiVuoti, CURRENT_VERSION, STATI, ripulisciLibro, ripulisciCapitolo, ripulisciCitazione, ripulisciParola, ripulisciLettura, TEMI, MAX_SCARTATI, chiaveScartatoValida } from './migrazione.js';
 import { pagineDi } from './calcoli.js';
 
 // Nome sotto cui i dati sono salvati nel browser. Deve essere unico: tutte le app
@@ -354,6 +354,21 @@ export function aggiornaRipasso(aggiornata) {
   Object.assign(p, ripulisciParola(aggiornata));
   save();
 }
+
+// ---------- consigli scartati ----------
+// "No, grazie" su un consiglio: la sua chiave viene ricordata (anche nel backup) e non lo si propone più.
+
+export function scartaConsiglio(chiave) {
+  if (!chiaveScartatoValida(chiave) || data.scartati.includes(chiave)) return;
+  data.scartati.push(chiave);
+  if (data.scartati.length > MAX_SCARTATI) data.scartati.splice(0, data.scartati.length - MAX_SCARTATI);
+  save();
+}
+export function riprendiConsiglio(chiave) {
+  const i = data.scartati.indexOf(chiave);
+  if (i >= 0) { data.scartati.splice(i, 1); save(); }
+}
+export function dimenticaScartati() { data.scartati = []; save(); }
 
 // ---------- impostazioni ----------
 

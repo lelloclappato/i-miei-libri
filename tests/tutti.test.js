@@ -4,5 +4,6 @@ import './calcoli.test.js';
 import './formato.test.js';
 import './rete.test.js';
 import './dati.test.js';
+import './consigli.test.js';
 
 esegui();

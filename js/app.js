@@ -10,6 +10,8 @@ import { preparaImport } from './backup.js';
 import { setupPWA } from './pwa.js';
 import { applicaTema } from './viste/altro.js';
 import { apriParola } from './pannelli/parola.js';
+import { apriAggiungiLibro } from './pannelli/libro-form.js';
+import { apriScansione, puoScansionare } from './pannelli/scansione.js';
 // Le schermate: importarle basta a registrarle (ognuna chiama registraVista e registraAzioni).
 import './viste/oggi.js';
 import './viste/libreria.js';
@@ -109,10 +111,13 @@ segnaVisita();
 visita = numeroDiQui();
 render();
 
-// Scorciatoia dall'icona dell'app (tenendola premuta): "Parola nuova" apre subito il pannello.
-if (new URLSearchParams(location.search).get('azione') === 'parola') {
+// Scorciatoie dall'icona dell'app (tenendola premuta): "Parola nuova" e "Scansiona un libro" aprono subito il pannello.
+const scorciatoia = new URLSearchParams(location.search).get('azione');
+if (scorciatoia === 'parola' || scorciatoia === 'scansiona') {
   history.replaceState(history.state, '', location.pathname + location.hash); // toglie ?azione=… dall'indirizzo
-  apriParola();
+  if (scorciatoia === 'parola') apriParola();
+  else if (puoScansionare()) apriScansione();
+  else apriAggiungiLibro();
 }
 
 // I dati stanno solo nel browser: gli si chiede di non cancellarli da solo quando lo spazio scarseggia.
