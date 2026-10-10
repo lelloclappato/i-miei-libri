@@ -1,6 +1,6 @@
 // La pagina di un libro: copertina e dati, la lista in cui sta, l'avanzamento, e le sue sezioni
 // (riassunti dei capitoli, parole, citazioni, diario delle letture, scheda).
-import { data, libro, cambiaStato, eliminaLibro, eliminaLettura, cambiaPreferita } from '../dati.js';
+import { data, libro, cambiaStato, eliminaLibro, ripristinaLibro, eliminaLettura, cambiaPreferita } from '../dati.js';
 import { ui } from '../stato.js';
 import { esc, escRighe, dataTesto, ilGiorno, plurale, durata } from '../utili.js';
 import { icona } from '../icone.js';
@@ -48,10 +48,13 @@ function riquadroStato(l) {
   }
   return `<section class="scheda">
     <div class="stato-libro">
-      <label for="stato-libro" class="etichetta" style="margin:0">Lista</label>
-      <select id="stato-libro" data-scrivi="stato-libro" data-id="${esc(l.id)}">
-        ${STATI.map(s => `<option value="${s}" ${s === l.stato ? 'selected' : ''}>${NOME_STATO_LIBRO[s]}</option>`).join('')}
-      </select>
+      <div class="stato-scelta">
+        <label for="stato-libro" class="etichetta" style="margin:0">Lista</label>
+        <select id="stato-libro" data-scrivi="stato-libro" data-id="${esc(l.id)}">
+          ${STATI.map(s => `<option value="${s}" ${s === l.stato ? 'selected' : ''}>${NOME_STATO_LIBRO[s]}</option>`).join('')}
+        </select>
+      </div>
+      <button type="button" class="bottone-testo togli" data-azione="elimina-libro" data-id="${esc(l.id)}">${icona('cestino')}Togli</button>
     </div>
     ${sotto}
   </section>`;
@@ -154,7 +157,7 @@ function sezioneScheda(l) {
       <button type="button" class="bottone bottone--secondario" data-azione="scarica-nota" data-id="${esc(l.id)}">${icona('scarica')}Scarica la nota</button>
       <button type="button" class="bottone bottone--secondario" data-azione="copia-nota" data-id="${esc(l.id)}">${icona('copia')}Copia il testo</button>
     </div>
-    <div style="margin-top:22px"><button type="button" class="bottone-testo bottone-testo--pericolo" data-azione="elimina-libro" data-id="${esc(l.id)}">${icona('cestino')}Elimina il libro</button></div>`;
+    <div style="margin-top:22px"><button type="button" class="bottone-testo bottone-testo--pericolo" data-azione="elimina-libro" data-id="${esc(l.id)}">${icona('cestino')}Togli dalla libreria</button></div>`;
 }
 
 function vista(r) {
@@ -224,14 +227,19 @@ registraAzioni({
     if (!l) return;
     avviso((await copia(libroInMarkdown(l, data.parole))) ? 'Testo copiato: incollalo in una nota' : 'Non riesco a copiare: usa “Scarica la nota”.');
   },
+  // "Togli": il libro esce dalla libreria (da qualunque lista sia). Subito dopo si può ancora annullare.
   'elimina-libro': async el => {
     const l = libro(el.dataset.id);
     if (!l) return;
     const dentro = [l.capitoli.length ? plurale(l.capitoli.length, 'riassunto', 'riassunti') : '', l.citazioni.length ? plurale(l.citazioni.length, 'citazione', 'citazioni') : ''].filter(Boolean).join(' e ');
-    const ok = await conferma(`Eliminare “${l.titolo}”?`, { dettaglio: (dentro ? `Perderai anche ${dentro}. ` : '') + 'Le parole imparate restano nel quaderno.' });
+    const ok = await conferma(`Togliere “${l.titolo}” da “${NOMI_STATO[l.stato]}”?`, {
+      ok: 'Togli',
+      dettaglio: 'Esce dalla libreria' + (dentro ? `, con ${dentro}` : '') + '. Le parole imparate restano nel quaderno. Per spostarlo in un’altra lista, usa invece il menu “Lista”.'
+    });
     if (!ok) return;
-    eliminaLibro(l.id); ui.lista = l.stato;
-    vai('#/libreria'); avviso('Libro eliminato');
+    const copia = eliminaLibro(l.id); ui.lista = l.stato;
+    vai('#/libreria');
+    avviso(`“${l.titolo}” tolto da “${NOMI_STATO[l.stato]}”`, { etichetta: 'Annulla', azione: () => { if (ripristinaLibro(copia)) { render(); avviso('Rimesso al suo posto'); } } });
   }
 });
 

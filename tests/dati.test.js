@@ -114,6 +114,23 @@ test('eliminare un libro: via letture e cronometro, le parole restano senza coll
   uguale([D.data.libri.length, D.data.letture.length, D.data.letture[0].libroId === altro.id, D.data.timer], [1, 1, true, null]);
   uguale([D.data.parole.length, D.data.parole[0].libroId, D.data.parole[0].titoloLibro], [1, null, 'Da eliminare']);
 });
+test('"Annulla" dopo averlo tolto: torna tutto com’era (posto in lista, diario, parole, cronometro)', () => {
+  daCapo();
+  const primo = D.aggiungiLibro({ titolo: 'Primo', pagine: 100 }, 'da-leggere');
+  const l = D.aggiungiLibro({ titolo: 'Tolto per sbaglio', pagine: 100 }, 'leggendo');
+  D.aggiungiLibro({ titolo: 'Terzo', pagine: 100 }, 'da-leggere');
+  D.aggiornaPagina(l.id, 30);
+  D.salvaParola({ parola: 'ubbia', libroId: l.id });
+  D.avviaTimer(l.id);
+  const prima = JSON.stringify(D.data);
+  const copia = D.eliminaLibro(l.id);
+  uguale(D.data.libri.map(x => x.titolo), ['Primo', 'Terzo']);
+  vero(D.ripristinaLibro(copia));
+  uguale(JSON.stringify(D.data), prima);
+  vero(!D.ripristinaLibro(copia), 'una seconda volta non lo duplica');
+  uguale(D.eliminaLibro('non-esiste'), null);
+  vero(primo);
+});
 test('voto e recensione', () => {
   daCapo();
   const l = D.aggiungiLibro({ titolo: 'x' }, 'letto');

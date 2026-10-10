@@ -6,7 +6,7 @@ come *Le mie abitudini* e *Le Mie Finanze*.
 
 Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-pages)).
 
-## Cosa fa (v1.2)
+## Cosa fa (v1.3)
 
 - **Liste**: *Sto leggendo*, *Da leggere* (li ho già), *Voglio leggere* (la lista dei desideri), *Letti*, *Abbandonati*
 - **Aggiunta veloce**: scrivi titolo, autore o ISBN e l'app cerca copertina, autore, anno e pagine
@@ -43,7 +43,8 @@ Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-
 - **Libreria**: le liste e la ricerca tra i tuoi libri. *Aggiungi* apre la ricerca in rete, con il pulsante
   *Scansiona il codice a barre*. L'ultima scheda in alto, *Per te*, contiene i consigli.
   Toccando un libro si apre la sua pagina, con le sezioni *Capitoli*, *Parole*, *Citazioni*, *Diario* (le letture)
-  e *Scheda* (dati, modifica, esportazione, eliminazione). Il menu *Lista* in alto sposta il libro da una lista all'altra.
+  e *Scheda* (dati, modifica, esportazione). Il menu *Lista* in alto sposta il libro da una lista all'altra;
+  accanto, **Togli** lo toglie dalla libreria (chiede conferma, e subito dopo c'è "Annulla").
 - **Quaderno**: tutte le parole nuove e tutte le citazioni, di tutti i libri. Da qui parte il ripasso.
 - **Statistiche**: scegli l'anno con le frecce; tocca una colonna o un quadratino per leggere i numeri.
 - **Altro**: obiettivo dell'anno, tema, installazione, backup, vocabolario per Obsidian, chiave di Google Books.
@@ -197,7 +198,7 @@ python3 -m http.server 8000
 
 poi apri http://localhost:8000 nel browser.
 
-**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 202 test con dati inventati (conti, formato dei dati, scansione, consigli,
+**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 203 test con dati inventati (conti, formato dei dati, scansione, consigli,
 controllo dei backup, lettura delle risposte dei cataloghi e del dizionario, esportazione in Markdown, operazioni sui dati)
 e mostra in verde quelli superati e in rosso quelli falliti. I test salvano i loro dati di prova sotto un nome a parte
 (`libri-app-PROVA`): i tuoi libri non vengono toccati. Da riaprire dopo ogni modifica ai file in `js/`.

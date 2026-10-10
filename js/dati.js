@@ -89,12 +89,33 @@ export function modificaLibro(id, campi) {
 
 // Elimina un libro con i suoi riassunti, citazioni e letture.
 // Le parole imparate restano nel quaderno, senza più il collegamento (ma con il titolo scritto).
+// Toglie un libro dalla libreria, con il suo diario. Le parole imparate restano nel quaderno, senza collegamento.
+// Restituisce una copia di quello che è stato tolto, da passare a ripristinaLibro per l'"Annulla".
 export function eliminaLibro(id) {
-  data.libri = data.libri.filter(l => l.id !== id);
+  const indice = data.libri.findIndex(l => l.id === id);
+  if (indice < 0) return null;
+  const copia = {
+    libro: JSON.parse(JSON.stringify(data.libri[indice])), indice,
+    letture: data.letture.filter(s => s.libroId === id).map(s => ({ ...s })),
+    parole: data.parole.filter(p => p.libroId === id).map(p => p.id),
+    timer: data.timer && data.timer.libroId === id ? { ...data.timer } : null
+  };
+  data.libri.splice(indice, 1);
   data.letture = data.letture.filter(s => s.libroId !== id);
   for (const p of data.parole) if (p.libroId === id) p.libroId = null;
   if (data.timer && data.timer.libroId === id) data.timer = null;
   save();
+  return copia;
+}
+// "Annulla" dopo aver tolto un libro: lo rimette dov'era, con diario, collegamento delle parole e cronometro.
+export function ripristinaLibro(copia) {
+  if (!copia || !copia.libro || libro(copia.libro.id)) return false;
+  data.libri.splice(Math.min(copia.indice, data.libri.length), 0, copia.libro);
+  data.letture.push(...copia.letture);
+  for (const p of data.parole) if (copia.parole.includes(p.id) && !p.libroId) p.libroId = copia.libro.id;
+  if (copia.timer && !data.timer) data.timer = copia.timer;
+  save();
+  return true;
 }
 
 // Le regole di ogni passaggio di lista. conLettura = registra le pagine che mancavano come lette quel giorno.

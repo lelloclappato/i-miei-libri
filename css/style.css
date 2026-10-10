@@ -301,7 +301,9 @@ fieldset.campo legend { padding: 0; }
 .libro-testa h1 { font: 600 26px/1.15 var(--titoli); letter-spacing: -.01em; }
 .libro-testa .autore { font-size: 17px; margin-top: 4px; }
 .libro-testa .dettaglio { color: var(--tenue); font-size: 14px; margin-top: 6px; }
-.stato-libro { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stato-libro { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.stato-scelta { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.stato-libro .togli { color: var(--tenue); font-weight: 500; }
 .stato-libro select { min-height: 44px; padding: 6px 34px 6px 14px; border: 1.5px solid var(--inchiostro); border-radius: 999px; background-color: transparent; font-weight: 600; max-width: 100%; }
 
 /* un capitolo riassunto */
