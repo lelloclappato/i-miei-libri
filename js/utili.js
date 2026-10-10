@@ -1,7 +1,7 @@
 // Piccole funzioni di uso generale: date, numeri, testo.
 // Non sanno nulla dei libri: si possono riusare ovunque.
 
-export const APP_VERSION = '1.1';
+export const APP_VERSION = '1.2';
 
 export const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato']; // indice = Date.getDay()
 export const GIORNI_INIZIALI = ['D', 'L', 'M', 'M', 'G', 'V', 'S'];

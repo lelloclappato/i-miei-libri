@@ -6,7 +6,7 @@
 //   libri: [{
 //     id, titolo, autore, pagine, anno, editore, isbn, genere,
 //     copertina,            // indirizzo dell'immagine, oppure null (si disegna una copertina colorata)
-//     origine,              // 'openlibrary' | 'google' | 'manuale'
+//     origine,              // 'openlibrary' | 'google' | 'sbn' | 'manuale'
 //     stato,                // 'leggendo' | 'da-leggere' | 'voglio' | 'letto' | 'abbandonato'
 //     aggiunto, iniziato, finito,   // giorni "AAAA-MM-GG" (iniziato e finito possono essere null)
 //     finitoPrima,          // se lo stai rileggendo (o l'hai riletto): i giorni in cui l'avevi già finito
@@ -122,7 +122,7 @@ export function ripulisciLibro(l) {
     genere: testo(l.genere, 80).trim(),
     copertina: typeof l.copertina === 'string' && /^https:\/\//.test(l.copertina) ? l.copertina.slice(0, 500) : null,
     colore: Number.isInteger(l.colore) && l.colore >= 0 && l.colore < COLORI_COPERTINA ? l.colore : coloreDaTitolo(titolo),
-    origine: ['openlibrary', 'google', 'manuale'].includes(l.origine) ? l.origine : 'manuale',
+    origine: ['openlibrary', 'google', 'sbn', 'manuale'].includes(l.origine) ? l.origine : 'manuale',
     stato,
     aggiunto: giornoONull(l.aggiunto) || oggi(),
     iniziato: giornoONull(l.iniziato),

@@ -2,7 +2,7 @@
 // e dell'esportazione in Markdown. Non usano la rete: le risposte qui sotto sono copie
 // (accorciate) di risposte vere.
 import { gruppo, test, uguale, vero } from './mini-test.js';
-import { normalizzaOpenLibrary, normalizzaGoogle, unisci, comeIsbn } from '../js/ricerca.js';
+import { normalizzaOpenLibrary, normalizzaGoogle, unisci, comeIsbn, normalizzaSBN, titoloSBN, autoreSBN, pubblicazioneSBN, pagineSBN } from '../js/ricerca.js';
 import { estraiDefinizioni, linkTreccani } from '../js/dizionario.js';
 import { libroInMarkdown, vocabolarioInMarkdown, nomeCapitolo, nomeFile } from '../js/markdown.js';
 import { ripulisciLibro, ripulisciParola } from '../js/migrazione.js';
@@ -17,6 +17,44 @@ test('un titolo non è un ISBN', () => {
   uguale(comeIsbn('il nome della rosa'), null);
   uguale(comeIsbn('1984'), null);
   uguale(comeIsbn('12345678901234'), null);
+});
+
+gruppo('Ricerca: catalogo SBN (biblioteche italiane)');
+// copie di risposte vere di opac.sbn.it
+const breveSBN = { codiceIdentificativo: 'IT\\ICCU\\BAS\\0295312', isbn: '978-88-346-0047-4', autorePrincipale: 'Veronesi, Sandro <1959-    >',
+  titolo: 'Il colibrì : [romanzo] / Sandro Veronesi', pubblicazione: 'Milano : La nave di Teseo, 2020', livello: 'Monografia', tipo: 'Testo a stampa' };
+const schedaSBN = { codiceIdentificativo: 'IT\\ICCU\\BAS\\0295312', autorePrincipale: 'Veronesi, Sandro <1959- >', classificazioneDewey: '853.92 (21.) NARRATIVA ITALIANA, 2000-',
+  titolo: 'Il colibrì : [romanzo] / Sandro Veronesi', descrizioneFisica: '366 p. ; 22 cm', pubblicazione: 'Milano : La nave di Teseo, 2020' };
+test('una voce di SBN con la sua scheda diventa un libro completo', () => {
+  uguale(normalizzaSBN(breveSBN, schedaSBN), { titolo: 'Il colibrì', autore: 'Sandro Veronesi', pagine: 366, anno: 2020, editore: 'La nave di Teseo',
+    isbn: '9788834600474', genere: 'Romanzo', copertina: null, origine: 'sbn', bid: 'IT\\ICCU\\BAS\\0295312' });
+});
+test('senza scheda: tutto tranne le pagine', () => {
+  const l = normalizzaSBN(breveSBN);
+  uguale([l.titolo, l.autore, l.pagine, l.anno, l.editore], ['Il colibrì', 'Sandro Veronesi', null, 2020, 'La nave di Teseo']);
+});
+test('titoli scritti "da biblioteca"', () => {
+  uguale(titoloSBN("L' amica geniale / Elena Ferrante"), 'L’amica geniale'.replace('’', "'"));
+  uguale(titoloSBN('Il signore degli anelli : trilogia / John Ronald Reuel Tolkien ; edizione italiana a cura di Quirino Principe'), 'Il signore degli anelli');
+  uguale(titoloSBN('Il suggeritore : Romanzo di D. Carrisi / Donato Carrisi'), 'Il suggeritore');
+  uguale(titoloSBN('*Il *nome della rosa / Umberto Eco'), 'Il nome della rosa');
+});
+test('autori, editori, anni e pagine', () => {
+  uguale(autoreSBN('Tolkien, J. R. R.'), 'J. R. R. Tolkien');
+  uguale(autoreSBN('Zerocalcare'), 'Zerocalcare');
+  uguale(pubblicazioneSBN('Milano : Bompiani, [2014]'), { editore: 'Bompiani', anno: 2014 });
+  uguale(pubblicazioneSBN('[S.l.] : Bao publishing, stampa 2022'), { editore: 'Bao publishing', anno: 2022 });
+  uguale(pagineSBN('XV, 455 p. : ill. ; 21 cm'), 455);
+  uguale(pagineSBN('2 v. ; 24 cm'), null);
+  uguale(pagineSBN(undefined), null);
+});
+test('senza autore principale si prende quello dopo la "/"', () => {
+  uguale(normalizzaSBN({ titolo: 'Racconti scelti / Mario Rossi ; a cura di Anna Bianchi', tipo: 'Testo a stampa' }).autore, 'Mario Rossi');
+});
+test('voci strane o che non sono libri stampati vengono scartate', () => {
+  uguale(normalizzaSBN({ titolo: 'Un film', tipo: 'Materiale video' }), null);
+  uguale(normalizzaSBN(null), null);
+  uguale(normalizzaSBN({ titolo: '' }), null);
 });
 
 gruppo('Ricerca: Open Library');

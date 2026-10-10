@@ -6,11 +6,11 @@ come *Le mie abitudini* e *Le Mie Finanze*.
 
 Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-pages)).
 
-## Cosa fa (v1.1)
+## Cosa fa (v1.2)
 
 - **Liste**: *Sto leggendo*, *Da leggere* (li ho già), *Voglio leggere* (la lista dei desideri), *Letti*, *Abbandonati*
 - **Aggiunta veloce**: scrivi titolo, autore o ISBN e l'app cerca copertina, autore, anno e pagine
-  (Open Library e Google Books); se non lo trova lo scrivi a mano
+  (Open Library, il catalogo delle biblioteche italiane SBN e Google Books); se non lo trova lo scrivi a mano
 - **Scansione del codice a barre** (novità 1.1): inquadri il codice sul retro del libro con la fotocamera e l'app
   cerca il libro con quell'ISBN. Se lo trova si apre subito la scheda già compilata
 - **Per te** (novità 1.1): libri consigliati a partire da quelli a cui hai dato un voto alto, da quello che stai
@@ -112,7 +112,12 @@ Se hai almeno tre libri e non fai un backup da più di 30 giorni, *Oggi* te lo r
 
 ## Ricerca dei libri e chiave di Google Books
 
-Quando aggiungi un libro l'app interroga due cataloghi gratuiti:
+Quando aggiungi un libro l'app interroga tre cataloghi gratuiti:
+
+- **SBN**, il catalogo delle biblioteche italiane (opac.sbn.it, novità 1.2): ha praticamente tutti i libri pubblicati
+  in Italia, con editore, anno e pagine. Con un ISBN (scritto o scansionato) è il primo a cui si crede.
+  Non permette alle pagine web di interrogarlo direttamente, quindi si passa da un piccolo "ponte" su Cloudflare
+  (vedi sotto). Non ha le copertine: si prendono da Open Library quando ci sono.
 
 - **Open Library** (openlibrary.org): non serve niente, risponde sempre. Ha molti libri italiani ma non tutti,
   soprattutto tra i più recenti.
@@ -133,6 +138,17 @@ La chiave resta salvata solo sul tuo dispositivo: non è scritta nel codice, non
 Se Google la rifiuta, sotto i risultati della ricerca compare una riga che lo dice.
 I nomi dei menu della console di Google cambiano ogni tanto: se non li trovi uguali, cerca "Books API" nella barra in alto.
 
+### Il ponte verso SBN (Cloudflare)
+
+È il Worker **libri-sbn** sull'account Cloudflare (lo stesso del sito RS Floral), all'indirizzo
+`https://libri-sbn.debartologabriele2005-e41.workers.dev`. Il codice è in `ponte-sbn/worker.js` (non viene
+pubblicato su GitHub Pages). Fa solo tre cose: ricerca per ISBN, ricerca per titolo, scheda completa di un libro;
+risponde solo all'app (lelloclappato.github.io) e tiene le risposte una settimana per non disturbare SBN.
+Il piano gratuito di Cloudflare permette 100.000 richieste al giorno: una ricerca ne usa da 2 a 6.
+
+Per cambiarlo: Cloudflare → Workers e Pages → libri-sbn → Modifica codice → incolla `ponte-sbn/worker.js` → Distribuisci.
+Se il ponte non risponde, l'app continua a cercare su Open Library e Google Books come prima.
+
 Il suggerimento del significato usa il **Wikizionario** italiano (it.wiktionary.org), senza chiavi.
 
 ## Scansione del codice a barre
@@ -147,7 +163,7 @@ controllo, quindi una lettura sbagliata viene scartata e la fotocamera continua 
 - **Permesso**: la prima volta il telefono chiede di usare la fotocamera. Se dici di no, l'app spiega come
   cambiare idea e intanto puoi scrivere l'ISBN a mano.
 - **Luce**: se il telefono lo permette, compare il pulsante *Luce* per accendere il flash.
-- **Libro non trovato**: molti libri italiani non sono nei cataloghi gratuiti. L'ISBN letto resta comunque nella
+- **Libro non trovato**: con SBN succede di rado (libri stranieri non tradotti, o usciti da pochissimo). L'ISBN letto resta comunque nella
   scheda, anche se poi aggiungi il libro a mano o lo cerchi per titolo (se il risultato scelto non ha un ISBN suo).
 
 ## Per te: come nascono i consigli
@@ -181,7 +197,7 @@ python3 -m http.server 8000
 
 poi apri http://localhost:8000 nel browser.
 
-**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 193 test con dati inventati (conti, formato dei dati, scansione, consigli,
+**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 202 test con dati inventati (conti, formato dei dati, scansione, consigli,
 controllo dei backup, lettura delle risposte dei cataloghi e del dizionario, esportazione in Markdown, operazioni sui dati)
 e mostra in verde quelli superati e in rosso quelli falliti. I test salvano i loro dati di prova sotto un nome a parte
 (`libri-app-PROVA`): i tuoi libri non vengono toccati. Da riaprire dopo ogni modifica ai file in `js/`.
@@ -235,6 +251,7 @@ cancellata da fuori, alla prima apertura con internet riscarica tutto da sola.
     - `libro-form.js` (aggiungi e modifica un libro), `pagina.js` (segnalibro e obiettivo), `capitolo.js`,
       `parola.js`, `citazione.js`, `lettura-form.js` (fine lettura e lettura a mano), `giudizio.js` (voto e pensieri),
       `ripasso.js`, `scansione.js` (fotocamera e codice a barre)
+- `ponte-sbn/worker.js`: il ponte verso il catalogo SBN, che gira su Cloudflare (non fa parte del sito)
 - `vendor/`: il lettore di codici a barre di riserva, per i browser che non ne hanno uno (con le licenze)
 - `sw.js`, `manifest.json`, `icon-*.png`: installazione e funzionamento offline
 - `tests/`: i test (`test.html` da aprire nel browser)

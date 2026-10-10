@@ -9,6 +9,9 @@
 import { semplice } from './utili.js';
 
 const OPEN_LIBRARY = 'https://openlibrary.org/search.json';
+// Il "ponte" verso il catalogo delle biblioteche italiane (SBN): vedi ponte-sbn/worker.js e il README.
+// (Le prove sul computer possono sostituirlo con globalThis.__PONTE_SBN__.)
+const PONTE_SBN = globalThis.__PONTE_SBN__ || 'https://libri-sbn.debartologabriele2005-e41.workers.dev';
 const GOOGLE_BOOKS = 'https://www.googleapis.com/books/v1/volumes';
 const CAMPI_OL = 'key,title,author_name,first_publish_year,number_of_pages_median,cover_i,editions,editions.key,editions.title,editions.language,editions.number_of_pages,editions.cover_i,editions.isbn,editions.publisher,editions.publish_date';
 const ATTESA_MASSIMA = 12000; // millisecondi
@@ -94,6 +97,62 @@ export function normalizzaGoogle(item) {
   };
 }
 
+// ---------- catalogo SBN (biblioteche italiane) ----------
+// SBN scrive i dati come in una scheda di biblioteca: qui li si riporta alla forma di tutti i giorni.
+
+// "Il colibrì : [romanzo] / Sandro Veronesi" → "Il colibrì";  "L' amica geniale" → "L'amica geniale"
+export function titoloSBN(t) {
+  let s = scritta(t).split(' / ')[0];
+  s = s.split(' : ')[0].split(' ; ')[0];
+  s = s.replace(/\[[^\]]*\]/g, '').replace(/\*/g, '');
+  s = s.replace(/\b([A-Za-zÀ-ÿ]*[’'])\s+/g, '$1'); // l' amica → l'amica, dell' anno → dell'anno
+  return pulisciTitolo(s);
+}
+// "Veronesi, Sandro <1959- >" → "Sandro Veronesi";  "Tolkien, J. R. R." → "J. R. R. Tolkien"
+export function autoreSBN(a) {
+  const s = scritta(a).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  const [cognome, nome] = s.split(/,\s*/);
+  return nome ? `${nome} ${cognome}`.trim() : cognome || '';
+}
+// "Milano : La nave di Teseo, 2020" → { editore: 'La nave di Teseo', anno: 2020 }
+export function pubblicazioneSBN(p) {
+  const s = scritta(p);
+  const dopo = s.includes(' : ') ? s.split(' : ').slice(1).join(' : ') : s;
+  const editore = dopo.split(/[,;]/)[0].replace(/\[|\]/g, '').trim();
+  const anni = s.match(/\b(1[5-9]\d\d|20\d\d)\b/g);
+  return { editore: /^\d/.test(editore) ? '' : editore, anno: anni ? Number(anni[anni.length - 1]) : null };
+}
+// "366 p. ; 22 cm" → 366;  "XV, 455 p." → 455;  "2 v." → null
+export function pagineSBN(d) {
+  const m = scritta(d).match(/(\d+)\s*p\b/);
+  return m && Number(m[1]) > 0 ? Number(m[1]) : null;
+}
+// Una voce di SBN (breve, più la scheda completa se c'è) → un libro nel formato dell'app.
+export function normalizzaSBN(breve, scheda = null) {
+  const b = breve && typeof breve === 'object' ? breve : {};
+  const s = scheda && typeof scheda === 'object' ? scheda : {};
+  if (b.tipo && b.tipo !== 'Testo a stampa') return null;
+  const titolo = titoloSBN(s.titolo || b.titolo);
+  if (!titolo) return null;
+  // se manca l'autore principale (libri a più mani) si prende chi è scritto dopo la "/" del titolo
+  const dopoBarra = scritta(b.titolo || s.titolo).split(' / ')[1] || '';
+  const autore = autoreSBN(b.autorePrincipale || s.autorePrincipale) || dopoBarra.split(/\s*[;,]\s*/)[0].trim();
+  const { editore, anno } = pubblicazioneSBN(s.pubblicazione || b.pubblicazione);
+  const dewey = scritta(s.classificazioneDewey).toUpperCase();
+  return {
+    titolo,
+    autore: autore.slice(0, 200),
+    pagine: pagineSBN(s.descrizioneFisica),
+    anno,
+    editore,
+    isbn: scritta(b.isbn).replace(/[^0-9Xx]/g, ''),
+    genere: /NARRATIVA/.test(dewey) ? 'Romanzo' : /POESIA/.test(dewey) ? 'Poesia' : '',
+    copertina: null,
+    origine: 'sbn',
+    bid: scritta(b.codiceIdentificativo || s.codiceIdentificativo)
+  };
+}
+
 // Mette insieme più elenchi togliendo i doppioni (stesso ISBN, oppure stesso titolo e stesso primo autore).
 // Del doppione si tengono le informazioni che al primo mancavano (pagine, copertina, anno…).
 export function unisci(...elenchi) {
@@ -150,14 +209,32 @@ async function cercaGoogle(testo, chiave, segnale) {
   }
 }
 
-// Cerca nei due cataloghi insieme. Restituisce { libri, errore }:
-//   errore = true solo se NESSUNO dei due ha risposto (di solito: manca la connessione).
+// Catalogo SBN, attraverso il ponte. Per i primi risultati si chiede anche la scheda completa,
+// che ha il numero di pagine (si chiedono insieme; se una non arriva, il libro resta senza pagine).
+async function cercaSBN(testo, segnale) {
+  const isbn = comeIsbn(testo);
+  const domanda = isbn ? 'isbn=' + isbn : 'testo=' + encodeURIComponent(testo.slice(0, 100));
+  const json = await scarica(`${PONTE_SBN}/cerca?${domanda}`, segnale);
+  const brevi = (json && Array.isArray(json.briefRecords) ? json.briefRecords : []).filter(b => b && typeof b === 'object' && (!b.tipo || b.tipo === 'Testo a stampa'));
+  const conScheda = brevi.slice(0, isbn ? 2 : 5);
+  const schede = await Promise.allSettled(conScheda.map(b => scarica(`${PONTE_SBN}/scheda?bid=${encodeURIComponent(scritta(b.codiceIdentificativo))}`, segnale)));
+  return tutte(brevi.map((b, i) => [b, schede[i] && schede[i].status === 'fulfilled' ? schede[i].value : null]), ([b, s]) => normalizzaSBN(b, s));
+}
+
+// Cerca nei cataloghi insieme. Restituisce { libri, errore }:
+//   errore = true solo se NESSUNO ha risposto (di solito: manca la connessione).
 // Se la ricerca viene interrotta (segnale) lancia l'errore "AbortError", che chi chiama ignora.
 export async function cercaInRete(testo, { chiaveGoogle = '', segnale = null } = {}) {
   testo = String(testo).trim();
   if (testo.length < 2) return { libri: [], errore: false };
-  const [g, ol] = await Promise.allSettled([cercaGoogle(testo, chiaveGoogle, segnale), cercaOpenLibrary(testo, segnale)]);
+  const [g, ol, sbn] = await Promise.allSettled([cercaGoogle(testo, chiaveGoogle, segnale), cercaOpenLibrary(testo, segnale), cercaSBN(testo, segnale)]);
   if (segnale && segnale.aborted) { const e = new Error('interrotta'); e.name = 'AbortError'; throw e; }
-  const libri = unisci(g.status === 'fulfilled' ? g.value : [], ol.status === 'fulfilled' ? ol.value : []);
-  return { libri: libri.slice(0, 15), errore: g.status === 'rejected' && ol.status === 'rejected' };
+  const [gl, oll, sbnl] = [g, ol, sbn].map(x => (x.status === 'fulfilled' ? x.value : []));
+  // Con un ISBN, SBN viene prima: ha l'edizione italiana esatta (titolo, editore, pagine); gli altri aggiungono la copertina.
+  // Con un titolo, prima Open Library e Google (hanno le copertine), poi le edizioni che conosce solo SBN.
+  const libri = comeIsbn(testo) ? unisci(sbnl, gl, oll) : unisci(gl, oll, sbnl);
+  // un libro di SBN senza copertina: si prova quella di Open Library cercata per ISBN (se non c'è, resta quella disegnata)
+  for (const l of libri) if (!l.copertina && l.origine === 'sbn' && l.isbn) l.copertina = `https://covers.openlibrary.org/b/isbn/${l.isbn}-M.jpg?default=false`;
+  for (const l of libri) delete l.bid;
+  return { libri: libri.slice(0, 15), errore: [g, ol, sbn].every(x => x.status === 'rejected') };
 }

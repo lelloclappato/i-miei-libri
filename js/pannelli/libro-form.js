@@ -58,7 +58,7 @@ export function apriAggiungiLibro({ lista = null, testo = '', isbnLetto = null }
       }
       saltaSeUnico = false;
       if (errore) zona.innerHTML = '<p class="nota-avviso">Non riesco a cercare: controlla la connessione. Intanto puoi scriverlo a mano.</p>';
-      else if (!libri.length && dallaScansione) zona.innerHTML = `<p class="nota-avviso">Ho letto l’ISBN ${esc(isbnLetto)}, ma i cataloghi gratuiti non lo conoscono (capita con parecchi libri italiani). Scrivi il titolo qui sopra, oppure aggiungilo a mano: l’ISBN resta segnato.</p>`;
+      else if (!libri.length && dallaScansione) zona.innerHTML = `<p class="nota-avviso">Ho letto l’ISBN ${esc(isbnLetto)}, ma nessun catalogo lo conosce (capita con i libri usciti da pochissimo). Scrivi il titolo qui sopra, oppure aggiungilo a mano: l’ISBN resta segnato.</p>`;
       else if (!libri.length) zona.innerHTML = `<p class="nota-avviso">Nessun libro trovato per “${esc(q)}”. Prova con meno parole, con l’ISBN, oppure scrivilo a mano.</p>`;
       else {
         zona.innerHTML = `<ul>${libri.map((l, i) => {
