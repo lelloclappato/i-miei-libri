@@ -396,3 +396,21 @@ export async function preparaConsigli(libri, { segnale = null } = {}) {
   scriviJSON(NOME_CONSIGLI, { firma: firmaSemi(lista), quando: Date.now(), elenco });
   return { elenco, senzaSemi: false, errore: false };
 }
+
+// ---------- per il Mercatino ----------
+
+// I generi e gli argomenti che ti piacciono, ricavati da quello che Open Library ha già detto dei tuoi libri
+// (senza chiedere niente in rete: al mercatino la connessione può mancare).
+// Restituisce [{ chiave, motivo }], per esempio { chiave: 'fantasy', motivo: 'Fantasy, come «Lo Hobbit»' }.
+export function gustiSalvati(libri) {
+  const lista = semi(libri);
+  const memoria = leggiJSON(NOME_SEMI, {});
+  const info = {};
+  for (const { libro: l } of lista) { const m = memoria[chiaveSeme(l)]; if (m) info[l.id] = m.dati; }
+  return scegliRicerche(lista, info).soggetti.map(s => ({ chiave: s.chiave, motivo: motivoSoggetto(s) }));
+}
+// Cosa dice Open Library di un libro qualunque (autori e argomenti), oppure null. Serve la connessione.
+export async function argomentiDi(l, segnale = null) {
+  const i = await chiediSeme(l, segnale);
+  return i ? i.soggetti : null;
+}

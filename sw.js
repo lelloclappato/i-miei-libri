@@ -16,6 +16,11 @@ const PREFIX = 'libri-';              // tutte le cache di QUESTA app iniziano c
 const CACHE = PREFIX + VERSION;
 // Le copertine scaricate stanno in una cache a parte, che resta da una versione all'altra.
 const COPERTINE = PREFIX + 'copertine';
+// I programmi di terze parti in vendor/ (lettore dei codici a barre, lettore del testo: qualche MB) stanno in una
+// cache che resta da una versione all'altra: così non si riscaricano a ogni aggiornamento e al mercatino
+// funzionano senza connessione. Ogni versione di quei programmi ha la sua cartella (vendor/ocr-5.1.1/…):
+// un aggiornamento usa una cartella nuova, quindi la copia vecchia non viene mai scambiata per quella nuova.
+const VENDOR = PREFIX + 'vendor';
 const MAX_COPERTINE = 300;
 // In sviluppo (sul computer, VERSION = 'dev') si prende sempre tutto dalla rete,
 // altrimenti le modifiche ai file non si vedrebbero finché la cache non cambia nome.
@@ -27,14 +32,14 @@ const FILES = [
   './css/style.css',
   './fonts/instrument-sans-latin-variabile.woff2', './fonts/literata-latin-variabile.woff2', './fonts/literata-latin-variabile-corsivo.woff2',
   './js/app.js', './js/utili.js', './js/deposito.js', './js/dati.js', './js/migrazione.js', './js/validazione.js', './js/calcoli.js',
-  './js/stato.js', './js/icone.js', './js/ricerca.js', './js/consigli.js', './js/dizionario.js', './js/markdown.js', './js/backup.js', './js/pwa.js',
+  './js/stato.js', './js/icone.js', './js/ricerca.js', './js/consigli.js', './js/fotocamera.js', './js/ocr.js', './js/mercatino.js', './js/dizionario.js', './js/markdown.js', './js/backup.js', './js/pwa.js',
   './js/viste/comune.js', './js/viste/elementi.js', './js/viste/oggi.js', './js/viste/libreria.js', './js/viste/libro.js',
-  './js/viste/quaderno.js', './js/viste/statistiche.js', './js/viste/lettura.js', './js/viste/altro.js',
+  './js/viste/quaderno.js', './js/viste/statistiche.js', './js/viste/lettura.js', './js/viste/altro.js', './js/viste/mercatino.js',
   './js/pannelli/pannello.js', './js/pannelli/libro-form.js', './js/pannelli/giudizio.js', './js/pannelli/pagina.js',
   './js/pannelli/capitolo.js', './js/pannelli/citazione.js', './js/pannelli/parola.js', './js/pannelli/lettura-form.js', './js/pannelli/ripasso.js', './js/pannelli/scansione.js'
 ];
-// (Il lettore di codici a barre di riserva, in vendor/, non è in elenco: pesa 1 MB e serve solo ai browser
-// che non ne hanno uno loro. Se viene usato, finisce in cache da solo, come gli altri file non in elenco.)
+// (I file in vendor/ non sono in elenco: pesano qualche MB e non servono a tutti. Si scaricano la prima volta
+// che servono, o con "Prepara per il mercatino", e restano nella cache VENDOR: vedi sopra.)
 
 self.addEventListener('install', e => {
   // cache: 'reload' = scarica dalla rete ignorando la cache HTTP del browser, per avere i file nuovi
@@ -49,7 +54,7 @@ self.addEventListener('activate', e => {
     // con le altre app su lelloclappato.github.io, quindi si toccano solo quelle con il nostro prefisso
     // (e non quella delle copertine, che serve a tutte le versioni).
     for (const k of await caches.keys()) {
-      if (k.startsWith(PREFIX) && k !== CACHE && k !== COPERTINE) await caches.delete(k);
+      if (k.startsWith(PREFIX) && k !== CACHE && k !== COPERTINE && k !== VENDOR) await caches.delete(k);
     }
     await self.clients.claim(); // prende subito il controllo delle pagine aperte
   })());
@@ -67,6 +72,8 @@ self.addEventListener('fetch', e => {
   if (url.hostname === 'covers.openlibrary.org') { e.respondWith(copertina(req)); return; }
   // tutto il resto che non è del nostro sito (ricerca dei libri, dizionario) passa senza toccarlo
   if (url.origin !== self.location.origin) return;
+  // i programmi in vendor/: dalla loro cache, che resta tra le versioni
+  if (url.pathname.includes('/vendor/')) { e.respondWith(daVendor(req)); return; }
   // l'indirizzo principale dell'app (…/ oppure …/index.html, anche con ?parametri) risponde sempre con index.html
   const app = req.mode === 'navigate' && /\/(index\.html)?$/.test(url.pathname);
   e.respondWith(SVILUPPO ? reteConRiserva(req, app) : cachePrima(e, req, app));
@@ -111,6 +118,16 @@ async function reteConRiserva(req, app) {
     const c = await caches.open(CACHE);
     return (await c.match(req)) || (app && await c.match('./index.html')) || Response.error();
   }
+}
+
+// Programmi in vendor/: prima la copia salvata; se non c'è si scarica e si salva per sempre.
+async function daVendor(req) {
+  const cache = await caches.open(VENDOR);
+  const trovato = await cache.match(req, { ignoreSearch: true });
+  if (trovato) return trovato;
+  const r = await fetch(req);
+  if (r.ok && r.status === 200) await cache.put(req, r.clone()).catch(() => {});
+  return r;
 }
 
 // Copertine: prima la copia salvata; se non c'è si scarica e si salva.

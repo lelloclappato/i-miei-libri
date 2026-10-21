@@ -19,6 +19,7 @@ import './viste/libro.js';
 import './viste/quaderno.js';
 import './viste/statistiche.js';
 import './viste/lettura.js';
+import './viste/mercatino.js';
 
 // ---------- tocchi ----------
 document.addEventListener('click', e => {

@@ -20,6 +20,7 @@
   "shortcuts": [
     {"name": "Parola nuova", "short_name": "Parola", "url": "./?azione=parola"},
     {"name": "Scansiona un libro", "short_name": "Scansiona", "url": "./?azione=scansiona"},
+    {"name": "Mercatino", "short_name": "Mercatino", "url": "./#/mercatino"},
     {"name": "Libreria", "url": "./#/libreria"}
   ]
 }

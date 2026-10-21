@@ -542,3 +542,43 @@ body.con-timer #toast { bottom: calc(var(--barra-schede) + 62px + env(safe-area-
 .consiglio-azioni .bottone-testo { color: var(--tenue); font-weight: 500; }
 .piede-consigli { margin-top: 10px; }
 .piede-consigli .bottone-testo { min-height: 36px; padding: 4px 2px; font-size: 14px; }
+
+/* ---------- Mercatino ---------- */
+.testata-azioni { display: flex; flex-wrap: wrap; gap: 8px; }
+.testata-azioni .bottone .icona { width: 18px; height: 18px; }
+/* la fotocamera resta bassa, così la risposta compare subito sotto senza dover scorrere */
+.mirino--mercatino { aspect-ratio: 4 / 3; max-height: 34vh; }
+.mirino--mercatino video { object-fit: cover; }
+.mirino--mercatino .mirino-riquadro { left: 8%; right: 8%; top: 14%; bottom: 14%; }
+.mirino--mercatino + .azioni { margin-top: 10px !important; }
+.cerca--mercatino { margin-top: 16px; }
+.esito { margin-top: 4px; padding: 16px; border-radius: var(--raggio); border: 1px solid var(--linea); background: var(--foglio); }
+.esito-titolo { display: flex; align-items: center; gap: 10px; font: 600 21px/1.2 var(--titoli); }
+.esito-titolo .icona { width: 26px; height: 26px; flex: none; }
+.esito-libro { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 14px; }
+.esito-libro .copertina { width: 60px; }
+.esito-libro h3 { font: 600 17px/1.25 var(--titoli); overflow-wrap: anywhere; }
+.esito-libro .autore { color: var(--tenue); font-size: 15px; }
+.esito-libro .dettaglio { color: var(--tenue); font-size: 14px; margin-top: 2px; }
+.esito-motivo { margin: 12px 0 4px; }
+.esito .azioni { margin-top: 14px; }
+.esito-fatto { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 600; }
+.esito-fatto .icona { width: 20px; height: 20px; }
+/* i colori del giudizio: l'evidenziatore per i desideri, il nastro rosso per "potrebbe piacerti" */
+.esito--desiderio { background: var(--evidenziatore); border-color: var(--evidenziatore); color: var(--su-evidenziatore); }
+.esito--desiderio .tenue, .esito--desiderio .esito-libro .autore, .esito--desiderio .esito-libro .dettaglio { color: var(--su-evidenziatore); opacity: .85; }
+.esito--desiderio .esito-titolo .icona { fill: currentColor; }
+.esito--piacere { border: 2px solid var(--nastro); }
+.esito--piacere .esito-titolo .icona { color: var(--nastro); }
+.esito--ce-l-hai { background: var(--incavo); }
+.esito--attenzione { border: 2px dashed var(--linea-forte); }
+.mercatino-scelte .risultato:last-child { border-bottom: 0; }
+.riga-visto { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 10px 0; border: 0; border-bottom: 1px solid var(--linea); background: none; text-align: left; }
+.riga-visto b { display: block; font: 600 16px/1.25 var(--titoli); overflow-wrap: anywhere; }
+.riga-visto span span { display: block; color: var(--tenue); font-size: 14px; }
+.pallino-esito { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--linea-forte); padding: 0; margin: 0; }
+.pallino-esito.esito--desiderio { background: var(--evidenziatore); border-color: var(--su-evidenziatore); }
+.pallino-esito.esito--piacere { background: var(--nastro); border-color: var(--nastro); }
+.pallino-esito.esito--ce-l-hai { background: var(--letto); border-color: var(--letto); }
+.etichetta-esito { font-size: 13px; font-weight: 600; color: var(--tenue); white-space: nowrap; }
+#prepara-mercatino { margin-top: 22px; }

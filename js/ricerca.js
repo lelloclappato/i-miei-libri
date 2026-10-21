@@ -211,12 +211,12 @@ async function cercaGoogle(testo, chiave, segnale) {
 
 // Catalogo SBN, attraverso il ponte. Per i primi risultati si chiede anche la scheda completa,
 // che ha il numero di pagine (si chiedono insieme; se una non arriva, il libro resta senza pagine).
-async function cercaSBN(testo, segnale) {
+async function cercaSBN(testo, segnale, conSchede = true) {
   const isbn = comeIsbn(testo);
   const domanda = isbn ? 'isbn=' + isbn : 'testo=' + encodeURIComponent(testo.slice(0, 100));
   const json = await scarica(`${PONTE_SBN}/cerca?${domanda}`, segnale);
   const brevi = (json && Array.isArray(json.briefRecords) ? json.briefRecords : []).filter(b => b && typeof b === 'object' && (!b.tipo || b.tipo === 'Testo a stampa'));
-  const conScheda = brevi.slice(0, isbn ? 2 : 5);
+  const conScheda = conSchede ? brevi.slice(0, isbn ? 2 : 5) : [];
   const schede = await Promise.allSettled(conScheda.map(b => scarica(`${PONTE_SBN}/scheda?bid=${encodeURIComponent(scritta(b.codiceIdentificativo))}`, segnale)));
   return tutte(brevi.map((b, i) => [b, schede[i] && schede[i].status === 'fulfilled' ? schede[i].value : null]), ([b, s]) => normalizzaSBN(b, s));
 }
@@ -224,10 +224,11 @@ async function cercaSBN(testo, segnale) {
 // Cerca nei cataloghi insieme. Restituisce { libri, errore }:
 //   errore = true solo se NESSUNO ha risposto (di solito: manca la connessione).
 // Se la ricerca viene interrotta (segnale) lancia l'errore "AbortError", che chi chiama ignora.
-export async function cercaInRete(testo, { chiaveGoogle = '', segnale = null } = {}) {
+//   schede = false: niente schede complete di SBN (si risparmiano richieste; i libri restano senza pagine)
+export async function cercaInRete(testo, { chiaveGoogle = '', segnale = null, schede = true } = {}) {
   testo = String(testo).trim();
   if (testo.length < 2) return { libri: [], errore: false };
-  const [g, ol, sbn] = await Promise.allSettled([cercaGoogle(testo, chiaveGoogle, segnale), cercaOpenLibrary(testo, segnale), cercaSBN(testo, segnale)]);
+  const [g, ol, sbn] = await Promise.allSettled([cercaGoogle(testo, chiaveGoogle, segnale), cercaOpenLibrary(testo, segnale), cercaSBN(testo, segnale, schede || !!comeIsbn(testo))]);
   if (segnale && segnale.aborted) { const e = new Error('interrotta'); e.name = 'AbortError'; throw e; }
   const [gl, oll, sbnl] = [g, ol, sbn].map(x => (x.status === 'fulfilled' ? x.value : []));
   // Con un ISBN, SBN viene prima: ha l'edizione italiana esatta (titolo, editore, pagine); gli altri aggiungono la copertina.

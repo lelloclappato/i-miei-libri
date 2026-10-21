@@ -120,7 +120,7 @@ function elencoPerTe() {
       <button class="bottone" data-azione="rifai-consigli">${icona('ripeti')}Cerca di nuovo</button></div>`;
   }
   const quando = salvati ? quandoTesto(chiaveDi(new Date(salvati.quando))) : '';
-  return `<p class="tenue piccolo">Scelti in base ai libri che ti sono piaciuti e a quello che stai leggendo.</p>
+  return `<p class="tenue piccolo">Scelti in base ai libri che ti sono piaciuti e a quello che stai leggendo. Al mercatino, la modalità <a href="#/mercatino">Mercatino</a> ti avvisa se trovi uno di questi.</p>
     ${erroreConsigli ? '<p class="nota-avviso">Non sono riuscito ad aggiornarli (manca la connessione?): sono quelli dell’ultima volta.</p>' : ''}
     <ul class="consigli">${visibili.map(rigaConsiglio).join('')}</ul>
     <p class="tenue piccolo piede-consigli">${preparando ? 'Sto aggiornando i consigli…' : `Aggiornati ${esc(quando)}. <button type="button" class="bottone-testo" data-azione="rifai-consigli">Aggiorna</button>`}
@@ -157,7 +157,10 @@ function vista() {
   return `
     <header class="testata">
       <h1 class="titolo-pagina">Libreria</h1>
-      <button class="bottone bottone--piccolo" data-azione="aggiungi-libro" data-lista="${ui.lista}">${icona('piu')}Aggiungi</button>
+      <div class="testata-azioni">
+        <a class="bottone bottone--piccolo bottone--secondario" href="#/mercatino">${icona('bancarella')}Mercatino</a>
+        <button class="bottone bottone--piccolo" data-azione="aggiungi-libro" data-lista="${ui.lista}">${icona('piu')}Aggiungi</button>
+      </div>
     </header>
     ${data.libri.length ? `
     <div class="cerca">${icona('cerca')}

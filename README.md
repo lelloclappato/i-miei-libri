@@ -6,7 +6,7 @@ come *Le mie abitudini* e *Le Mie Finanze*.
 
 Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-pages)).
 
-## Cosa fa (v1.3)
+## Cosa fa (v1.4)
 
 - **Liste**: *Sto leggendo*, *Da leggere* (li ho già), *Voglio leggere* (la lista dei desideri), *Letti*, *Abbandonati*
 - **Aggiunta veloce**: scrivi titolo, autore o ISBN e l'app cerca copertina, autore, anno e pagine
@@ -16,6 +16,10 @@ Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-
 - **Per te** (novità 1.1): libri consigliati a partire da quelli a cui hai dato un voto alto, da quello che stai
   leggendo, dai tuoi autori e dai tuoi generi. Ognuno dice perché è lì; con un tocco va in *Voglio leggere*
   o *Da leggere*, oppure lo scarti e non torna più
+- **Mercatino** (novità 1.4): giri tra le bancarelle e inquadri i libri. Il codice a barre lo legge da solo, uno
+  dopo l'altro; per i libri vecchi senza codice tocchi *Leggi il titolo* e legge la copertina o il dorso. Ti dice
+  subito se il libro è **nei desideri**, se **ce l'hai già**, se **potrebbe piacerti** (e perché) o se è di un autore
+  che ti è piaciuto poco. Funziona anche senza connessione (vedi più sotto)
 - **Segnalibro**: la pagina a cui sei arrivato, con la barra a forma di blocco di pagine e il nastro rosso.
   Dice quanto ti manca e, se continui così, in che giorno finisci
 - **Riassunto capitolo per capitolo**: un testo per ogni capitolo, con numero, titolo e "fino a pagina".
@@ -50,8 +54,8 @@ Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-
 - **Altro**: obiettivo dell'anno, tema, installazione, backup, vocabolario per Obsidian, chiave di Google Books.
 
 Per installarla sul telefono: apri il sito, poi "Aggiungi a schermata Home" (Android: menu ⋮ di Chrome → "Installa app";
-iPhone: pulsante Condividi in Safari). Tenendo premuta l'icona dell'app compaiono le scorciatoie **Parola nuova**
-e **Scansiona un libro**.
+iPhone: pulsante Condividi in Safari). Tenendo premuta l'icona dell'app compaiono le scorciatoie **Parola nuova**,
+**Scansiona un libro** e **Mercatino**.
 
 ## Il ripasso delle parole
 
@@ -159,13 +163,44 @@ controllo, quindi una lettura sbagliata viene scartata e la fotocamera continua 
 (per esempio quello piccolo del prezzo) vengono ignorati.
 
 - **Chi legge il codice**: Chrome su Android ha un lettore già pronto e l'app usa quello. Negli altri browser
-  (Firefox, Chrome sul computer…) la prima volta si scarica un lettore di riserva di circa 1 MB, che sta in `vendor/`
-  (barcode-detector + zxing-wasm, licenze MIT e Apache 2.0, vedi `vendor/LICENZE.txt`).
+  (Firefox, Chrome sul computer…) la prima volta si scarica un lettore di riserva di circa 1 MB, che sta in
+  `vendor/codici-3.2.2/` (barcode-detector + zxing-wasm, licenze MIT e Apache 2.0, vedi il file `LICENZE.txt` lì dentro).
 - **Permesso**: la prima volta il telefono chiede di usare la fotocamera. Se dici di no, l'app spiega come
   cambiare idea e intanto puoi scrivere l'ISBN a mano.
 - **Luce**: se il telefono lo permette, compare il pulsante *Luce* per accendere il flash.
 - **Libro non trovato**: con SBN succede di rado (libri stranieri non tradotti, o usciti da pochissimo). L'ISBN letto resta comunque nella
   scheda, anche se poi aggiungi il libro a mano o lo cerchi per titolo (se il risultato scelto non ha un ISBN suo).
+
+## Mercatino
+
+Si apre dalla **Libreria** (pulsante *Mercatino*) o tenendo premuta l'icona dell'app.
+
+- **Codice a barre**: la fotocamera resta accesa e lo legge da sola. Puoi passare da un libro all'altro: un codice
+  rimasto inquadrato non viene riletto finché la fotocamera non ne vede uno diverso.
+- **Leggi il titolo**: per i libri senza codice. Inquadra il titolo (copertina o dorso) e tocca il pulsante: il testo
+  si legge **sul telefono**, senza internet e senza costi, con Tesseract (`vendor/ocr-5.1.1/`, licenza Apache 2.0).
+  Prova prima l'immagine così com'è, poi a colori invertiti (scritte chiare su fondo scuro), poi girata di lato
+  (i dorsi). Le parole lette vengono confrontate con i tuoi libri in modo tollerante: una lettera sbagliata o due
+  parole attaccate non impediscono di riconoscere il titolo. Se legge male, scrivi due parole del titolo.
+- **Scrivere o usare uno scanner Bluetooth**: il campo *Oppure scrivi titolo, autore o ISBN*; uno scanner Bluetooth
+  (la "pistola" dei codici a barre) funziona da solo, anche senza toccare il campo.
+- **La risposta**, in ordine di importanza:
+  1. *È nella tua lista dei desideri!* (il telefono vibra due volte), con la nota "perché questo libro";
+  2. *Ce l'hai già* (letto, da leggere, in lettura o lasciato), per non comprare doppioni;
+  3. *Potrebbe piacerti*: è tra i consigli *Per te*, oppure è dello stesso autore di un libro a cui hai dato 4-5 stelle
+     o che stai leggendo, oppure hai già nei desideri un altro libro dello stesso autore, oppure è di un genere che leggi
+     spesso (per questo serve la connessione: si chiedono a Open Library gli argomenti del libro);
+  4. *Occhio*: è di un autore che ti è piaciuto poco (1-2 stelle) o che hai lasciato a metà;
+  5. *Niente di speciale per i tuoi gusti*.
+- **L'ho comprato** sposta il libro dai desideri a *Da leggere* (o lo aggiunge lì); **Ai desideri** lo mette nella lista
+  dei desideri.
+- **Visti oggi**: l'elenco dei libri guardati durante la giornata, per confrontare le bancarelle. Resta solo sul
+  telefono e il giorno dopo si svuota.
+
+**Senza connessione** (succede spesso ai mercatini) funzionano il codice a barre e la lettura del titolo, e il
+confronto con desideri, libreria, autori e consigli già salvati. Non si possono cercare nei cataloghi i libri che non
+hai mai visto. Per essere pronti, a casa con il wifi tocca **Prepara per il mercatino**: scarica la lettura del titolo
+(circa 5 MB, una volta sola: resta anche quando l'app si aggiorna) e aggiorna i consigli *Per te*.
 
 ## Per te: come nascono i consigli
 
@@ -198,7 +233,7 @@ python3 -m http.server 8000
 
 poi apri http://localhost:8000 nel browser.
 
-**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 203 test con dati inventati (conti, formato dei dati, scansione, consigli,
+**Test**: apri http://localhost:8000/tests/test.html. La pagina esegue 220 test con dati inventati (conti, formato dei dati, scansione, consigli, mercatino,
 controllo dei backup, lettura delle risposte dei cataloghi e del dizionario, esportazione in Markdown, operazioni sui dati)
 e mostra in verde quelli superati e in rosso quelli falliti. I test salvano i loro dati di prova sotto un nome a parte
 (`libri-app-PROVA`): i tuoi libri non vengono toccati. Da riaprire dopo ogni modifica ai file in `js/`.
@@ -237,6 +272,9 @@ cancellata da fuori, alla prima apertura con internet riscarica tutto da sola.
   - `calcoli.js`: avanzamento, serie, statistiche, stime, ripasso (funzioni "pure", testate)
   - `ricerca.js`: ricerca dei libri su Open Library e Google Books (e lettura dell'ISBN dal codice a barre)
   - `consigli.js`: i consigli "Per te"
+  - `fotocamera.js`: fotocamera e lettore dei codici a barre (usati dalla scansione e dal Mercatino)
+  - `ocr.js`: lettura del testo da una foto (il titolo sulla copertina), sul telefono
+  - `mercatino.js`: riconoscere un libro dalle parole lette e il giudizio (desideri, ce l'hai, potrebbe piacerti…)
   - `dizionario.js`: suggerimento del significato dal Wikizionario
   - `markdown.js`: esportazione per Obsidian
   - `backup.js`: esporta e importa il file JSON
@@ -245,7 +283,8 @@ cancellata da fuori, alla prima apertura con internet riscarica tutto da sola.
   - `stato.js`, `utili.js`: stato dell'interfaccia e piccole funzioni comuni
   - `viste/`: le schermate
     - `comune.js`: il telaio (quale schermata disegnare, barra in basso, avvisi, copertina, nastro)
-    - `oggi.js`, `libreria.js`, `libro.js`, `quaderno.js`, `statistiche.js`, `lettura.js` (cronometro), `altro.js`
+    - `oggi.js`, `libreria.js`, `libro.js`, `quaderno.js`, `statistiche.js`, `lettura.js` (cronometro), `altro.js`,
+      `mercatino.js`
     - `elementi.js`: pezzi usati in più schermate (una parola, una citazione)
   - `pannelli/`: le finestre che salgono dal basso
     - `pannello.js`: apertura, chiusura e finestra di conferma
@@ -253,7 +292,11 @@ cancellata da fuori, alla prima apertura con internet riscarica tutto da sola.
       `parola.js`, `citazione.js`, `lettura-form.js` (fine lettura e lettura a mano), `giudizio.js` (voto e pensieri),
       `ripasso.js`, `scansione.js` (fotocamera e codice a barre)
 - `ponte-sbn/worker.js`: il ponte verso il catalogo SBN, che gira su Cloudflare (non fa parte del sito)
-- `vendor/`: il lettore di codici a barre di riserva, per i browser che non ne hanno uno (con le licenze)
+- `vendor/`: programmi di altri, ognuno nella cartella della sua versione e con le sue licenze. Non sono nell'elenco
+  dei file scaricati all'installazione: si scaricano quando servono e restano in una cache che sopravvive agli
+  aggiornamenti (vedi `sw.js`). Per aggiornarne uno si crea una cartella nuova, non si sovrascrive quella vecchia.
+  - `codici-3.2.2/`: il lettore di codici a barre di riserva, per i browser che non ne hanno uno
+  - `ocr-5.1.1/`: Tesseract, per leggere il titolo dalla copertina (motore e modello italiano, circa 5 MB)
 - `sw.js`, `manifest.json`, `icon-*.png`: installazione e funzionamento offline
 - `tests/`: i test (`test.html` da aprire nel browser)
 - `.github/workflows/deploy-pages.yml`: pubblicazione su GitHub Pages

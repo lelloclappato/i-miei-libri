@@ -9,10 +9,11 @@ import { icona } from '../icone.js';
 import { percento, daRipassare } from '../calcoli.js';
 
 const viste = {};   // nome → funzione che restituisce l'HTML della schermata
+const dopoViste = {}; // nome → funzione chiamata appena la schermata è disegnata (per esempio per accendere la fotocamera)
 const azioni = {};  // nome → funzione chiamata quando si tocca un elemento con data-azione="nome"
 const scritture = {}; // nome → funzione chiamata mentre si scrive in un campo con data-scrivi="nome"
 
-export function registraVista(nome, fn) { viste[nome] = fn; }
+export function registraVista(nome, fn, dopo = null) { viste[nome] = fn; if (dopo) dopoViste[nome] = dopo; }
 export function registraAzioni(nuove) { Object.assign(azioni, nuove); }
 export function registraScritture(nuove) { Object.assign(scritture, nuove); }
 export function azione(nome) { return azioni[nome]; }
@@ -49,7 +50,7 @@ const SCHEDE = [
   { nome: 'altro', testo: 'Altro', icona: 'altro' }
 ];
 // a quale scheda in basso appartiene ogni schermata
-const SCHEDA_DI = { libro: 'libreria', lettura: 'oggi' };
+const SCHEDA_DI = { libro: 'libreria', lettura: 'oggi', mercatino: 'libreria' };
 
 export function render() {
   const r = rotta();
@@ -71,6 +72,7 @@ export function render() {
   }
   disegnaSchede(r);
   disegnaStriscia(r);
+  if (dopoViste[r.nome]) { try { dopoViste[r.nome](r); } catch (errore) { console.error(errore); } }
   document.title = titoloPagina(r);
   // la lista o la sezione scelta potrebbe essere fuori dallo schermo (la riga scorre di lato): la si porta in vista
   for (const riga of app.querySelectorAll('.segmenti')) {
