@@ -21,11 +21,12 @@ export function controllaBackup(json) {
     libri: quanti(d.libri),
     capitoli: (Array.isArray(d.libri) ? d.libri : []).reduce((s, l) => s + (oggetto(l) ? quanti(l.capitoli) : 0), 0),
     citazioni: (Array.isArray(d.libri) ? d.libri : []).reduce((s, l) => s + (oggetto(l) ? quanti(l.citazioni) : 0), 0),
+    personaggi: (Array.isArray(d.libri) ? d.libri : []).reduce((s, l) => s + (oggetto(l) ? quanti(l.personaggi) : 0), 0),
     parole: quanti(d.parole),
     letture: quanti(d.letture)
   });
   const prima = conta(json), dopo = conta(dati);
-  const nomi = { libri: 'libri', capitoli: 'riassunti', citazioni: 'citazioni', parole: 'parole', letture: 'letture' };
+  const nomi = { libri: 'libri', capitoli: 'riassunti', citazioni: 'citazioni', personaggi: 'personaggi', parole: 'parole', letture: 'letture' };
   for (const k of Object.keys(nomi)) {
     if (dopo[k] < prima[k]) avvisi.push(`${prima[k] - dopo[k]} ${nomi[k]} su ${prima[k]} non erano leggibili e sono stati lasciati fuori.`);
   }

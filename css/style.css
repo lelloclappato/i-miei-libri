@@ -219,18 +219,19 @@ body.con-timer #app { padding-bottom: calc(var(--barra-schede) + 100px + env(saf
 /* ---------- libro in lettura (Oggi) ---------- */
 .in-lettura { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; }
 /* un titolo con una parola lunghissima va a capo dentro la parola, invece di allargare la pagina */
-.in-lettura h2, .libro-testa h1, .riga-libro h3, .lettura-ora h1, .voce .parola, .risultato b, .capitolo h3 { overflow-wrap: anywhere; }
+.in-lettura h2, .libro-testa h1, .riga-libro h3, .lettura-ora h1, .voce .parola, .risultato b, .capitolo h3, .personaggio h3 { overflow-wrap: anywhere; }
 .in-lettura h2 { font: 600 22px/1.2 var(--titoli); }
 .in-lettura .autore { color: var(--tenue); margin-top: 2px; }
 .in-lettura a { text-decoration: none; }
 .in-lettura-sotto { grid-column: 1 / -1; }
 .stima { margin-top: -6px; color: var(--tenue); font-size: 14.5px; }
 
-/* tre azioni veloci: riassunto, parola, citazione */
-.veloci { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-.veloce { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 68px; padding: 10px 4px;
-  border: 1.5px solid var(--linea); border-radius: var(--raggio-piccolo); background: var(--foglio); font-size: 14px; font-weight: 600; line-height: 1.2; }
-.veloce .icona { width: 20px; height: 20px; }
+/* quattro azioni veloci: riassunto, parola, citazione, personaggio */
+/* due righe da due: "Personaggio" non ci sta in un quarto di schermo su un telefono stretto */
+.veloci { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.veloce { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 8px 10px;
+  border: 1.5px solid var(--linea); border-radius: var(--raggio-piccolo); background: var(--foglio); font-size: 15px; font-weight: 600; line-height: 1.2; }
+.veloce .icona { width: 20px; height: 20px; flex: none; }
 
 /* ---------- elenco di libri ---------- */
 .riga-libro { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--linea); text-decoration: none; }
@@ -306,14 +307,15 @@ fieldset.campo legend { padding: 0; }
 .stato-libro .togli { color: var(--tenue); font-weight: 500; }
 .stato-libro select { min-height: 44px; padding: 6px 34px 6px 14px; border: 1.5px solid var(--inchiostro); border-radius: 999px; background-color: transparent; font-weight: 600; max-width: 100%; }
 
-/* un capitolo riassunto */
-.capitolo { padding: 16px 0; border-bottom: 1px solid var(--linea); }
-.capitolo:first-child { padding-top: 4px; }
-.capitolo:last-child { border-bottom: 0; }
+/* un capitolo riassunto (e, con lo stesso aspetto, un personaggio) */
+.capitolo, .personaggio { padding: 16px 0; border-bottom: 1px solid var(--linea); }
+.capitolo:first-child, .personaggio:first-child { padding-top: 4px; }
+.capitolo:last-child, .personaggio:last-child { border-bottom: 0; }
 .capitolo-testa { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.capitolo h3 { font: 600 19px/1.25 var(--titoli); }
-.capitolo .sopra { color: var(--tenue); font-size: 14px; }
-.capitolo .lettura { margin-top: 8px; white-space: pre-wrap; }
+.capitolo h3, .personaggio h3 { font: 600 19px/1.25 var(--titoli); }
+.capitolo .sopra, .personaggio .sopra { color: var(--tenue); font-size: 14px; }
+.capitolo .lettura, .personaggio .lettura { margin-top: 8px; white-space: pre-wrap; }
+.personaggio .da-scrivere { margin-top: 6px; color: var(--tenue); font-style: italic; }
 .capitolo .lettura.accorciato { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; line-clamp: 6; overflow: hidden; }
 .capitolo .da-scrivere { margin-top: 6px; color: var(--tenue); font-style: italic; }
 

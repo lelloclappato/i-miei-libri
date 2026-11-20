@@ -209,6 +209,12 @@ test('la nota del libro: citazioni in ordine di pagina, parole solo di questo li
   vero(!md.includes('**altra**'));
   vero(!/\n{3,}/.test(md), 'niente righe vuote doppie');
 });
+test('la nota del libro: personaggi in ordine di apparizione, prima delle citazioni', () => {
+  const l = ripulisciLibro({ ...LIBRO, personaggi: [{ nome: 'Viola', chi: 'la ragazza\ndella villa accanto', pagina: 40 }, { nome: 'Cosimo', chi: 'il barone', pagina: 3 }, { nome: 'Biagio' }] });
+  const md = libroInMarkdown(l, PAROLE);
+  vero(md.includes('## Personaggi\n\n- **Cosimo** (da pag. 3): il barone\n- **Viola** (da pag. 40): la ragazza della villa accanto\n- **Biagio**\n'), md);
+  vero(md.indexOf('## Personaggi') < md.indexOf('## Citazioni'));
+});
 test('libro senza appunti: solo intestazione e titolo', () => {
   const md = libroInMarkdown(ripulisciLibro({ titolo: 'Vuoto', stato: 'voglio' }), []);
   vero(md.includes('# Vuoto') && !md.includes('## '));

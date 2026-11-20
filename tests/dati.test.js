@@ -329,6 +329,59 @@ test('una citazione vuota non si salva', () => {
   uguale(a.citazioni.length, 0);
 });
 
+gruppo('Personaggi');
+test('aggiungere un personaggio, poi aggiornarlo mentre vai avanti', () => {
+  daCapo();
+  const l = D.aggiungiLibro({ titolo: 'x' }, 'leggendo');
+  const p = D.salvaPersonaggio(l.id, { nome: '  Adso da Melk ', chi: 'il novizio che racconta', pagina: 19 });
+  uguale([l.personaggi.length, p.nome, p.pagina, p.data], [1, 'Adso da Melk', 19, OGGI]);
+  D.salvaPersonaggio(l.id, { id: p.id, chi: 'il novizio che racconta; allievo di Guglielmo' });
+  uguale([l.personaggi.length, l.personaggi[0].nome, l.personaggi[0].chi, l.personaggi[0].pagina], [1, 'Adso da Melk', 'il novizio che racconta; allievo di Guglielmo', 19]);
+});
+test('senza nome non si salva', () => {
+  daCapo();
+  const l = D.aggiungiLibro({ titolo: 'x' }, 'leggendo');
+  uguale([D.salvaPersonaggio(l.id, { nome: '   ', chi: 'qualcuno' }), l.personaggi.length], [null, 0]);
+});
+test('lo stesso nome due volte nello stesso libro no (maiuscole e accenti non contano), in un altro libro sì', () => {
+  daCapo();
+  const a = D.aggiungiLibro({ titolo: 'a' }, 'leggendo'), b = D.aggiungiLibro({ titolo: 'b' }, 'leggendo');
+  D.salvaPersonaggio(a.id, { nome: 'Niccolò' });
+  uguale(D.salvaPersonaggio(a.id, { nome: 'niccolo' }), null);
+  vero(D.personaggioConNome(a.id, 'NICCOLÒ') !== null);
+  vero(D.salvaPersonaggio(b.id, { nome: 'Niccolò' }) !== null);
+  uguale([a.personaggi.length, b.personaggi.length], [1, 1]);
+});
+test('rinominare un personaggio con il suo stesso nome va bene', () => {
+  daCapo();
+  const l = D.aggiungiLibro({ titolo: 'x' }, 'leggendo');
+  const p = D.salvaPersonaggio(l.id, { nome: 'jorge' });
+  vero(D.salvaPersonaggio(l.id, { id: p.id, nome: 'Jorge' }) !== null);
+  uguale(l.personaggi[0].nome, 'Jorge');
+});
+test('eliminare un personaggio', () => {
+  daCapo();
+  const l = D.aggiungiLibro({ titolo: 'x' }, 'leggendo');
+  const p = D.salvaPersonaggio(l.id, { nome: 'Berengario' });
+  D.eliminaPersonaggio(l.id, p.id);
+  uguale(l.personaggi.length, 0);
+});
+test('modificare la scheda del libro non tocca i personaggi', () => {
+  daCapo();
+  const l = D.aggiungiLibro({ titolo: 'x' }, 'leggendo');
+  D.salvaPersonaggio(l.id, { nome: 'Malachia' });
+  D.modificaLibro(l.id, { titolo: 'Titolo nuovo' });
+  uguale(D.libro(l.id).personaggi.map(p => p.nome), ['Malachia']);
+});
+test('"Annulla" dopo aver tolto il libro rimette anche i personaggi', () => {
+  daCapo();
+  const l = D.aggiungiLibro({ titolo: 'x' }, 'leggendo');
+  D.salvaPersonaggio(l.id, { nome: 'Ubertino' });
+  const copia = D.eliminaLibro(l.id);
+  D.ripristinaLibro(copia);
+  uguale(D.libro(l.id).personaggi.map(p => p.nome), ['Ubertino']);
+});
+
 gruppo('Parole nuove');
 test('una parola nuova: collegata al libro, da ripassare da domani', () => {
   daCapo();

@@ -3,8 +3,8 @@
 // Il formato dei dati è descritto in migrazione.js. Le schermate non modificano mai "data" a mano:
 // chiamano le funzioni di questo file, così le regole stanno in un posto solo.
 import { deposito } from './deposito.js';
-import { oggi, uid, piuGiorni } from './utili.js';
-import { upgrade, datiVuoti, CURRENT_VERSION, STATI, ripulisciLibro, ripulisciCapitolo, ripulisciCitazione, ripulisciParola, ripulisciLettura, TEMI, MAX_SCARTATI, chiaveScartatoValida } from './migrazione.js';
+import { oggi, uid, piuGiorni, semplice } from './utili.js';
+import { upgrade, datiVuoti, CURRENT_VERSION, STATI, ripulisciLibro, ripulisciCapitolo, ripulisciCitazione, ripulisciPersonaggio, ripulisciParola, ripulisciLettura, TEMI, MAX_SCARTATI, chiaveScartatoValida } from './migrazione.js';
 import { pagineDi } from './calcoli.js';
 
 // Nome sotto cui i dati sono salvati nel browser. Deve essere unico: tutte le app
@@ -67,7 +67,7 @@ export function libro(id) { return data.libri.find(l => l.id === id) || null; }
 //   paginaIniziale:  per un libro che stai già leggendo, la pagina a cui sei: quelle pagine le hai lette
 //                    prima di usare l'app, quindi non finiscono nel diario e nelle statistiche
 export function aggiungiLibro(campi, stato = 'da-leggere', giornoFine = null, paginaIniziale = 0) {
-  const l = ripulisciLibro({ ...campi, id: uid(), stato: 'da-leggere', aggiunto: oggi(), pagina: 0, finitoPrima: [], capitoli: [], citazioni: [] });
+  const l = ripulisciLibro({ ...campi, id: uid(), stato: 'da-leggere', aggiunto: oggi(), pagina: 0, finitoPrima: [], capitoli: [], citazioni: [], personaggi: [] });
   data.libri.push(l);
   applicaStato(l, STATI.includes(stato) ? stato : 'da-leggere', giornoFine, false);
   if (l.stato === 'leggendo' && paginaIniziale > 0) l.pagina = l.pagine ? Math.min(paginaIniziale, l.pagine) : paginaIniziale;
@@ -75,11 +75,11 @@ export function aggiungiLibro(campi, stato = 'da-leggere', giornoFine = null, pa
   return l;
 }
 
-// Cambia i dati di scheda (titolo, autore, pagine, date…). Non tocca stato, capitoli e citazioni.
+// Cambia i dati di scheda (titolo, autore, pagine, date…). Non tocca stato, capitoli, citazioni e personaggi.
 export function modificaLibro(id, campi) {
   const l = libro(id);
   if (!l) return null;
-  const nuovo = ripulisciLibro({ ...l, ...campi, id: l.id, stato: l.stato, finitoPrima: l.finitoPrima, capitoli: l.capitoli, citazioni: l.citazioni });
+  const nuovo = ripulisciLibro({ ...l, ...campi, id: l.id, stato: l.stato, finitoPrima: l.finitoPrima, capitoli: l.capitoli, citazioni: l.citazioni, personaggi: l.personaggi });
   Object.assign(l, nuovo);
   // se il titolo cambia, le parole collegate ricordano il titolo nuovo
   for (const p of data.parole) if (p.libroId === l.id) p.titoloLibro = l.titolo;
@@ -345,6 +345,34 @@ export function cambiaPreferita(libroId, citazioneId) {
   if (!c) return false;
   c.preferita = !c.preferita; save();
   return c.preferita;
+}
+
+// ---------- personaggi ----------
+// Chi è chi nel libro che stai leggendo: nome, chi è, e la pagina in cui compare la prima volta.
+
+// Un personaggio di quel libro con lo stesso nome (senza badare a maiuscole e accenti), tranne quello indicato.
+export function personaggioConNome(libroId, nome, tranneId = null) {
+  const l = libro(libroId), cerca = semplice(nome);
+  if (!l || !cerca) return null;
+  return l.personaggi.find(p => p.id !== tranneId && semplice(p.nome) === cerca) || null;
+}
+// Crea o aggiorna (se p.id esiste già) un personaggio. Restituisce null se manca il nome
+// o se nel libro c'è già un altro personaggio con lo stesso nome.
+export function salvaPersonaggio(libroId, p) {
+  const l = libro(libroId);
+  if (!l) return null;
+  const esistente = p.id ? l.personaggi.find(x => x.id === p.id) : null;
+  const pulito = ripulisciPersonaggio({ ...(esistente || {}), ...p, id: esistente ? esistente.id : uid(), data: esistente ? esistente.data : oggi() });
+  if (!pulito.nome || personaggioConNome(libroId, pulito.nome, pulito.id)) return null;
+  if (esistente) Object.assign(esistente, pulito); else l.personaggi.push(pulito);
+  save();
+  return pulito;
+}
+export function eliminaPersonaggio(libroId, personaggioId) {
+  const l = libro(libroId);
+  if (!l) return;
+  l.personaggi = l.personaggi.filter(p => p.id !== personaggioId);
+  save();
 }
 
 // ---------- parole nuove ----------

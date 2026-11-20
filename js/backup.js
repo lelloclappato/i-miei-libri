@@ -43,7 +43,7 @@ export function esportaBackup() {
 export function chiediImport() { document.getElementById('importFile').click(); }
 
 function elenco(r) {
-  return [plurale(r.libri, 'libro', 'libri'), plurale(r.capitoli, 'riassunto', 'riassunti'), plurale(r.parole, 'parola', 'parole'), plurale(r.citazioni, 'citazione', 'citazioni')].join(', ');
+  return [plurale(r.libri, 'libro', 'libri'), plurale(r.capitoli, 'riassunto', 'riassunti'), plurale(r.parole, 'parola', 'parole'), plurale(r.citazioni, 'citazione', 'citazioni'), r.personaggi ? plurale(r.personaggi, 'personaggio', 'personaggi') : ''].filter(Boolean).join(', ');
 }
 
 // Legge il file scelto, lo controlla e, se va bene e l'utente conferma, sostituisce i dati.

@@ -1,9 +1,9 @@
 // Trasforma la scheda di un libro (o tutto il vocabolario) in un testo Markdown,
-// il formato delle note di Obsidian: così riassunti, citazioni e parole si possono
+// il formato delle note di Obsidian: così riassunti, personaggi, citazioni e parole si possono
 // incollare o salvare nel Second Brain. Funzioni pure, con i loro test.
 import { ilGiorno, plurale } from './utili.js';
 import { NOME_STATO_LIBRO } from './migrazione.js';
-import { capitoliInOrdine } from './calcoli.js';
+import { capitoliInOrdine, personaggiInOrdine } from './calcoli.js';
 
 // Nome leggibile di un capitolo: "Capitolo 3", oppure il titolo per quelli senza numero (prologo, epilogo…).
 export function nomeCapitolo(c) {
@@ -44,6 +44,17 @@ export function libroInMarkdown(libro, parole = []) {
       r.push('### ' + (c.numero > 0 && c.titolo ? `${nome} – ${c.titolo}` : nome), '');
       r.push(c.riassunto.trim() || '_Ancora da riassumere._', '');
     }
+  }
+
+  if (libro.personaggi.length) {
+    r.push('## Personaggi', '');
+    for (const p of personaggiInOrdine(libro)) {
+      let s = `- **${p.nome}**`;
+      if (p.pagina !== null) s += ` (da pag. ${p.pagina})`;
+      if (p.chi.trim()) s += ': ' + p.chi.trim().replace(/\n+/g, ' ');
+      r.push(s);
+    }
+    r.push('');
   }
 
   if (libro.citazioni.length) {

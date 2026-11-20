@@ -273,3 +273,16 @@ test('giorno della settimana in cui leggi di più', () => {
   uguale(C.giornoPreferito([lettura('2026-10-08', 20), lettura('2026-10-01', 30), lettura('2026-10-04', 40)]), 4); // due giovedì battono una domenica
   uguale(C.giornoPreferito([]), null);
 });
+
+gruppo('Personaggi');
+test('in ordine di apparizione; senza pagina in fondo; a pari pagina in ordine alfabetico', () => {
+  const l = libro({ personaggi: [{ nome: 'Jorge', pagina: 120 }, { nome: 'Salvatore' }, { nome: 'Guglielmo', pagina: 19 }, { nome: 'Adso', pagina: 19 }] });
+  uguale(C.personaggiInOrdine(l).map(p => p.nome), ['Adso', 'Guglielmo', 'Jorge', 'Salvatore']);
+});
+test('"chi era?": cerca nel nome e in quello che hai scritto, senza badare agli accenti', () => {
+  const l = libro({ personaggi: [{ nome: 'Niccolò da Morimondo', chi: 'il mastro vetraio' }, { nome: 'Severino', chi: 'l’erborista, amico di Guglielmo' }, { nome: 'Remigio', chi: 'il cellario' }] });
+  uguale(C.cercaPersonaggi(l.personaggi, 'niccolo').map(p => p.nome), ['Niccolò da Morimondo']);
+  uguale(C.cercaPersonaggi(l.personaggi, 'amico guglielmo').map(p => p.nome), ['Severino']);
+  uguale(C.cercaPersonaggi(l.personaggi, '  ').length, 3);
+  uguale(C.cercaPersonaggi(l.personaggi, 'abate').length, 0);
+});

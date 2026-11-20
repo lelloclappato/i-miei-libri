@@ -14,7 +14,8 @@
 //     voto,                 // 0 = nessun voto, altrimenti da 1 a 5
 //     recensione, nota,
 //     capitoli:  [{ id, numero, titolo, riassunto, finoAPagina, data }],
-//     citazioni: [{ id, testo, pagina, nota, preferita, data }]
+//     citazioni: [{ id, testo, pagina, nota, preferita, data }],
+//     personaggi: [{ id, nome, chi, pagina, data }]   // chi è (ruolo, legami…) e pagina in cui compare la prima volta
 //   }],
 //   parole:  [{ id, parola, significato, frase, libroId, titoloLibro, pagina, data,
 //               livello, prossimo, ripassi, errori }],   // livello 0-5 e "prossimo" servono al ripasso
@@ -105,6 +106,16 @@ export function ripulisciCitazione(c) {
   };
 }
 
+export function ripulisciPersonaggio(p) {
+  return {
+    id: idBuono(p.id),
+    nome: testo(p.nome, 120).trim(),
+    chi: testo(p.chi, 3000),
+    pagina: interoONull(p.pagina),
+    data: giornoONull(p.data) || oggi()
+  };
+}
+
 export function ripulisciLibro(l) {
   const stato = STATI.includes(l.stato) ? l.stato : 'da-leggere';
   const pagine = interoONull(l.pagine) || null; // 0 pagine non ha senso: vale come "non lo so"
@@ -133,7 +144,8 @@ export function ripulisciLibro(l) {
     recensione: testo(l.recensione),
     nota: testo(l.nota, 2000),
     capitoli: idUnici((Array.isArray(l.capitoli) ? l.capitoli : []).filter(oggetto).map(ripulisciCapitolo)),
-    citazioni: idUnici((Array.isArray(l.citazioni) ? l.citazioni : []).filter(oggetto).map(ripulisciCitazione).filter(c => c.testo.trim()))
+    citazioni: idUnici((Array.isArray(l.citazioni) ? l.citazioni : []).filter(oggetto).map(ripulisciCitazione).filter(c => c.testo.trim())),
+    personaggi: idUnici((Array.isArray(l.personaggi) ? l.personaggi : []).filter(oggetto).map(ripulisciPersonaggio).filter(p => p.nome))
   };
 }
 

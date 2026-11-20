@@ -251,6 +251,18 @@ export function cercaLibri(libri, testo) {
   return libri.filter(l => { const dove = semplice(`${l.titolo} ${l.autore} ${l.genere}`); return pezzi.every(p => dove.includes(p)); });
 }
 
+// I personaggi in ordine di apparizione (chi non ha la pagina va in fondo), a parità in ordine alfabetico.
+export function personaggiInOrdine(l) {
+  return [...l.personaggi].sort((a, b) => (a.pagina ?? 1e9) - (b.pagina ?? 1e9) || a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+}
+// "Chi era?": cerca nel nome e in quello che hai scritto di lui (così trovi anche "il fratello di…").
+export function cercaPersonaggi(personaggi, testo) {
+  const q = semplice(testo);
+  if (!q) return personaggi;
+  const pezzi = q.split(' ');
+  return personaggi.filter(p => { const dove = semplice(`${p.nome} ${p.chi}`); return pezzi.every(x => dove.includes(x)); });
+}
+
 export function cercaParole(parole, testo) {
   const q = semplice(testo);
   if (!q) return parole;

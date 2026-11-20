@@ -12,6 +12,7 @@ import { apriPagina, apriObiettivo } from '../pannelli/pagina.js';
 import { apriCapitolo } from '../pannelli/capitolo.js';
 import { apriParola } from '../pannelli/parola.js';
 import { apriCitazione } from '../pannelli/citazione.js';
+import { apriPersonaggio } from '../pannelli/personaggio.js';
 import { apriRipasso } from '../pannelli/ripasso.js';
 import { apriGiudizio } from '../pannelli/giudizio.js';
 
@@ -26,12 +27,13 @@ export function fraseStima(l) {
   return pezzi.join(' ');
 }
 
-// Le tre azioni veloci, uguali in "Oggi" e nella schermata del cronometro.
+// Le quattro azioni veloci, uguali in "Oggi" e nella schermata del cronometro.
 export function azioniVeloci(id) {
   return `<div class="veloci">
     <button type="button" class="veloce" data-azione="nuovo-capitolo" data-id="${esc(id)}">${icona('documento')}Riassunto</button>
     <button type="button" class="veloce" data-azione="nuova-parola" data-id="${esc(id)}">${icona('scintille')}Parola</button>
     <button type="button" class="veloce" data-azione="nuova-citazione" data-id="${esc(id)}">${icona('citazione')}Citazione</button>
+    <button type="button" class="veloce" data-azione="nuovo-personaggio" data-id="${esc(id)}">${icona('persone')}Personaggio</button>
   </div>`;
 }
 
@@ -173,6 +175,7 @@ registraAzioni({
   'nuovo-capitolo': el => apriCapitolo(el.dataset.id),
   'nuova-parola': el => apriParola({ libroId: el.dataset.id || undefined }),
   'nuova-citazione': el => apriCitazione({ libroId: el.dataset.id || null }),
+  'nuovo-personaggio': el => apriPersonaggio({ libroId: el.dataset.id || null }),
   'ripassa': () => apriRipasso(),
   'obiettivo': el => apriObiettivo(el.dataset.id || undefined),
   'inizia': el => { cambiaStato(el.dataset.id, 'leggendo'); render(); avviso('Buona lettura'); },

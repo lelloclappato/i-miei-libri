@@ -6,7 +6,7 @@ come *Le mie abitudini* e *Le Mie Finanze*.
 
 Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-pages)).
 
-## Cosa fa (v1.4)
+## Cosa fa (v1.5)
 
 - **Liste**: *Sto leggendo*, *Da leggere* (li ho già), *Voglio leggere* (la lista dei desideri), *Letti*, *Abbandonati*
 - **Aggiunta veloce**: scrivi titolo, autore o ISBN e l'app cerca copertina, autore, anno e pagine
@@ -28,6 +28,9 @@ Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-
   Un pulsante propone il significato dal Wikizionario, un altro apre Treccani
 - **Ripasso a schede**: l'app ti ripropone le parole a distanza crescente finché non le sai (regole più sotto)
 - **Citazioni**: le frasi che ti colpiscono, con pagina, una nota, le preferite e il tasto per copiarle
+- **Personaggi**: per ogni libro, chi è chi: nome, chi è (ruolo, legami, cosa ha fatto finora) e la pagina in cui compare.
+  Sono in ordine di apparizione; oltre i 6 compare la ricerca *Chi era?*, che cerca anche in quello che hai scritto.
+  Si aggiungono dalla pagina del libro o dal pulsante *Personaggio* in Oggi e nel cronometro, e finiscono nella nota per Obsidian
 - **Cronometro di lettura**: parte da "Leggi adesso", continua anche a schermo spento o ad app chiusa;
   alla fine scrivi la pagina a cui sei arrivato. Le letture si possono anche aggiungere a mano
 - **Fine libro**: giorno, voto in stelle e "cosa ti ha lasciato". Se lo rileggi, resta scritto quando l'avevi già finito
@@ -46,7 +49,7 @@ Indirizzo: non ancora pubblicata (vedi [Pubblicazione](#pubblicazione-su-github-
   la serie di giorni e l'obiettivo dell'anno.
 - **Libreria**: le liste e la ricerca tra i tuoi libri. *Aggiungi* apre la ricerca in rete, con il pulsante
   *Scansiona il codice a barre*. L'ultima scheda in alto, *Per te*, contiene i consigli.
-  Toccando un libro si apre la sua pagina, con le sezioni *Capitoli*, *Parole*, *Citazioni*, *Diario* (le letture)
+  Toccando un libro si apre la sua pagina, con le sezioni *Capitoli*, *Personaggi*, *Parole*, *Citazioni*, *Diario* (le letture)
   e *Scheda* (dati, modifica, esportazione). Il menu *Lista* in alto sposta il libro da una lista all'altra;
   accanto, **Togli** lo toglie dalla libreria (chiede conferma, e subito dopo c'è "Annulla").
 - **Quaderno**: tutte le parole nuove e tutte le citazioni, di tutti i libri. Da qui parte il ripasso.
@@ -289,7 +292,7 @@ cancellata da fuori, alla prima apertura con internet riscarica tutto da sola.
   - `pannelli/`: le finestre che salgono dal basso
     - `pannello.js`: apertura, chiusura e finestra di conferma
     - `libro-form.js` (aggiungi e modifica un libro), `pagina.js` (segnalibro e obiettivo), `capitolo.js`,
-      `parola.js`, `citazione.js`, `lettura-form.js` (fine lettura e lettura a mano), `giudizio.js` (voto e pensieri),
+      `parola.js`, `citazione.js`, `personaggio.js`, `lettura-form.js` (fine lettura e lettura a mano), `giudizio.js` (voto e pensieri),
       `ripasso.js`, `scansione.js` (fotocamera e codice a barre)
 - `ponte-sbn/worker.js`: il ponte verso il catalogo SBN, che gira su Cloudflare (non fa parte del sito)
 - `vendor/`: programmi di altri, ognuno nella cartella della sua versione e con le sue licenze. Non sono nell'elenco

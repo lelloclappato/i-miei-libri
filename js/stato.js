@@ -3,7 +3,8 @@
 export const ui = {
   lista: 'leggendo',        // lista aperta nella Libreria (vedi STATI in migrazione.js), oppure 'per-te' per i consigli
   cercaLibri: '',           // testo della ricerca in Libreria
-  sezioneLibro: 'capitoli', // sezione aperta nella pagina di un libro: capitoli | parole | citazioni | diario | scheda
+  sezioneLibro: 'capitoli', // sezione aperta nella pagina di un libro: capitoli | personaggi | parole | citazioni | diario | scheda
+  cercaPersonaggi: '',      // ricerca tra i personaggi del libro aperto
   libroAperto: null,        // id dell'ultimo libro visitato (per ripartire dalla sezione "capitoli" quando cambia)
   capitoliAperti: new Set(),// riassunti lunghi mostrati per intero
   quaderno: 'parole',       // sezione del Quaderno: parole | citazioni

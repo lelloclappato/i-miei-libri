@@ -1,11 +1,11 @@
 // La pagina di un libro: copertina e dati, la lista in cui sta, l'avanzamento, e le sue sezioni
-// (riassunti dei capitoli, parole, citazioni, diario delle letture, scheda).
+// (riassunti dei capitoli, personaggi, parole, citazioni, diario delle letture, scheda).
 import { data, libro, cambiaStato, eliminaLibro, ripristinaLibro, eliminaLettura, cambiaPreferita } from '../dati.js';
 import { ui } from '../stato.js';
 import { esc, escRighe, dataTesto, ilGiorno, plurale, durata } from '../utili.js';
 import { icona } from '../icone.js';
 import { STATI, NOME_STATO_LIBRO, NOMI_STATO } from '../migrazione.js';
-import { percento, capitoliInOrdine, prossimoCapitolo, pagineDi } from '../calcoli.js';
+import { percento, capitoliInOrdine, prossimoCapitolo, pagineDi, personaggiInOrdine, cercaPersonaggi } from '../calcoli.js';
 import { libroInMarkdown, nomeCapitolo, nomeFile } from '../markdown.js';
 import { copertina, nastro, stelle, registraVista, registraAzioni, registraScritture, render, vai, avviso } from './comune.js';
 import { voceParola, bloccoCitazione, copia, scarica } from './elementi.js';
@@ -14,11 +14,12 @@ import { apriGiudizio } from '../pannelli/giudizio.js';
 import { apriCapitolo } from '../pannelli/capitolo.js';
 import { apriCitazione } from '../pannelli/citazione.js';
 import { apriParola } from '../pannelli/parola.js';
+import { apriPersonaggio } from '../pannelli/personaggio.js';
 import { apriModificaLibro } from '../pannelli/libro-form.js';
 import { apriLetturaManuale } from '../pannelli/lettura-form.js';
 import { conferma } from '../pannelli/pannello.js';
 
-const SEZIONI = [['capitoli', 'Capitoli'], ['parole', 'Parole'], ['citazioni', 'Citazioni'], ['diario', 'Diario'], ['scheda', 'Scheda']];
+const SEZIONI = [['capitoli', 'Capitoli'], ['personaggi', 'Personaggi'], ['parole', 'Parole'], ['citazioni', 'Citazioni'], ['diario', 'Diario'], ['scheda', 'Scheda']];
 const LUNGO = 480; // oltre questi caratteri un riassunto si mostra accorciato, con "Leggi tutto"
 
 // ---------- il riquadro in alto: lista e avanzamento ----------
@@ -86,6 +87,34 @@ function sezioneCapitoli(l) {
           : '<p class="da-scrivere">Ancora da riassumere.</p>'}
       </li>`;
     }).join('')}</ol>`;
+}
+
+// ---------- personaggi: "chi era questo?" ----------
+const CERCA_DA = 6; // con più personaggi di così compare la ricerca
+
+function elencoPersonaggi(l) {
+  const trovati = cercaPersonaggi(personaggiInOrdine(l), ui.cercaPersonaggi);
+  if (!trovati.length) return `<p class="tenue" style="padding:14px 0">Nessun personaggio con “${esc(ui.cercaPersonaggi.trim())}”.</p>`;
+  return trovati.map(p => `<li class="personaggio">
+      <div class="capitolo-testa">
+        <div>${p.pagina !== null ? `<p class="sopra">da pagina ${p.pagina}</p>` : ''}<h3>${esc(p.nome)}</h3></div>
+        <button type="button" class="tonda tonda--nuda" data-azione="apri-personaggio" data-libro="${esc(l.id)}" data-id="${esc(p.id)}" aria-label="Modifica ${esc(p.nome)}">${icona('matita')}</button>
+      </div>
+      ${p.chi.trim() ? `<p class="lettura" style="white-space:pre-wrap">${esc(p.chi.trim())}</p>` : '<p class="da-scrivere">Ancora da descrivere.</p>'}
+    </li>`).join('');
+}
+
+function sezionePersonaggi(l) {
+  if (!l.personaggi.length) {
+    return `<div class="vuoto"><h2 class="titolo-scheda">Nessun personaggio</h2>
+      <p>Chi è, con chi è legato, dove compare: quando un nome torna dopo cento pagine, lo ritrovi qui.</p>
+      <button type="button" class="bottone" data-azione="nuovo-personaggio" data-id="${esc(l.id)}">${icona('piu')}Aggiungi un personaggio</button></div>`;
+  }
+  return `<button type="button" class="bottone bottone--secondario bottone--largo" data-azione="nuovo-personaggio" data-id="${esc(l.id)}">${icona('piu')}Aggiungi un personaggio</button>
+    ${l.personaggi.length > CERCA_DA ? `<div class="cerca" style="margin:12px 0 0">${icona('cerca')}
+      <input type="search" data-scrivi="cerca-personaggi" data-id="${esc(l.id)}" value="${esc(ui.cercaPersonaggi)}" placeholder="Chi era?" aria-label="Cerca tra i personaggi" autocomplete="off" enterkeyhint="search">
+    </div>` : ''}
+    <ul id="elenco-personaggi" style="margin-top:6px">${elencoPersonaggi(l)}</ul>`;
 }
 
 function sezioneParole(l) {
@@ -168,11 +197,11 @@ function vista(r) {
       <a class="bottone" href="#/libreria">Vai alla libreria</a></div>`;
   }
   // entrando in un libro diverso si riparte dalla sezione dei capitoli
-  if (ui.libroAperto !== l.id) { ui.libroAperto = l.id; ui.sezioneLibro = 'capitoli'; ui.capitoliAperti = new Set(); }
+  if (ui.libroAperto !== l.id) { ui.libroAperto = l.id; ui.sezioneLibro = 'capitoli'; ui.capitoliAperti = new Set(); ui.cercaPersonaggi = ''; }
   const nParole = data.parole.filter(p => p.libroId === l.id).length;
-  const conta = { capitoli: l.capitoli.length, parole: nParole, citazioni: l.citazioni.length };
+  const conta = { capitoli: l.capitoli.length, personaggi: l.personaggi.length, parole: nParole, citazioni: l.citazioni.length };
   const dettaglio = [l.editore, l.anno, l.pagine ? plurale(l.pagine, 'pagina', 'pagine') : '', l.genere].filter(Boolean).join(', ');
-  const sezione = { capitoli: sezioneCapitoli, parole: sezioneParole, citazioni: sezioneCitazioni, diario: sezioneDiario, scheda: sezioneScheda }[ui.sezioneLibro] || sezioneCapitoli;
+  const sezione = { capitoli: sezioneCapitoli, personaggi: sezionePersonaggi, parole: sezioneParole, citazioni: sezioneCitazioni, diario: sezioneDiario, scheda: sezioneScheda }[ui.sezioneLibro] || sezioneCapitoli;
   return `
     <a class="torna" href="#/libreria" data-azione="vai-lista" data-id="${l.stato}">${icona('indietro')}${NOMI_STATO[l.stato]}</a>
     <header class="libro-testa">
@@ -198,6 +227,7 @@ registraAzioni({
   'apri-capitolo': el => apriCapitolo(el.dataset.libro, el.dataset.id),
   'apri-citazione': el => apriCitazione({ libroId: el.dataset.libro, citazioneId: el.dataset.id }),
   'apri-parola': el => apriParola({ parolaId: el.dataset.id }),
+  'apri-personaggio': el => apriPersonaggio({ libroId: el.dataset.libro, personaggioId: el.dataset.id }),
   'giudizio': el => apriGiudizio(el.dataset.id),
   'modifica-libro': el => apriModificaLibro(el.dataset.id),
   'lettura-manuale': el => apriLetturaManuale(el.dataset.id),
@@ -244,6 +274,12 @@ registraAzioni({
 });
 
 registraScritture({
+  // la ricerca tra i personaggi: si ridisegna solo l'elenco, così la tastiera resta aperta
+  'cerca-personaggi': el => {
+    ui.cercaPersonaggi = el.value;
+    const l = libro(el.dataset.id), ul = document.getElementById('elenco-personaggi');
+    if (l && ul) ul.innerHTML = elencoPersonaggi(l);
+  },
   // il menu "Lista" in cima alla pagina del libro
   'stato-libro': async el => {
     const id = el.dataset.id, stato = el.value, l = libro(id);

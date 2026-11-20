@@ -143,6 +143,17 @@ test('consigli scartati: si tengono quelli scritti bene, senza doppioni', () => 
   uguale(upgrade({ libri: [], scartati: 'OL1W' }).scartati, []);
 });
 
+test('personaggi: si tengono quelli con un nome, i campi rotti si riparano, gli id doppi si cambiano', () => {
+  const l = ripulisciLibro({ titolo: 'x', personaggi: [
+    { id: 'a', nome: ' Adso ', chi: 42, pagina: -3 }, { id: 'a', nome: 'Guglielmo', pagina: 19.4 }, { nome: '   ' }, 'rotto', null
+  ] });
+  uguale(l.personaggi.map(p => [p.nome, p.chi, p.pagina]), [['Adso', '42', null], ['Guglielmo', '', 19]]);
+  vero(l.personaggi[0].id !== l.personaggi[1].id);
+});
+test('un libro salvato prima dei personaggi riceve l’elenco vuoto', () => {
+  uguale(upgrade({ version: 1, libri: [{ id: 'x', titolo: 'Vecchio' }] }).libri[0].personaggi, []);
+});
+
 gruppo('Controllo del backup');
 test('un file qualunque non è un backup', () => {
   vero(!controllaBackup(null).ok);
@@ -165,7 +176,7 @@ test('backup buono: riepilogo di cosa contiene', () => {
     letture: [{ libroId: 'a', giorno: '2026-10-01', minuti: 20 }]
   });
   vero(c.ok);
-  uguale(c.riepilogo, { libri: 2, capitoli: 2, citazioni: 1, parole: 1, letture: 1 });
+  uguale(c.riepilogo, { libri: 2, capitoli: 2, citazioni: 1, personaggi: 0, parole: 1, letture: 1 });
   uguale(c.avvisi, []);
 });
 test('backup con pezzi rotti: si importa il resto e lo si dice', () => {
