@@ -10,8 +10,13 @@ async function chiama(token, url, opzioni = {}) {
   try { r = await fetch(url, { ...opzioni, headers: { Authorization: 'Bearer ' + token, ...(opzioni.headers || {}) } }); }
   catch (e) { throw errore('rete', 'Nessuna connessione: sincronizzo appena torna.'); }
   if (r.status === 401) throw errore('scaduto', 'L’accesso a Google è scaduto.');
-  if (r.status === 403) throw errore('vietato', 'Google Drive non accetta la richiesta (403).');
-  if (!r.ok) throw errore('drive', `Google Drive non risponde come dovrebbe (${r.status}).`);
+  if (!r.ok) {
+    // il motivo che dà Google (es. "accessNotConfigured" = la Drive API non è attiva nel progetto)
+    let motivo = '';
+    try { const j = await r.json(); motivo = (j.error && ((j.error.errors && j.error.errors[0] && j.error.errors[0].reason) || j.error.status)) || ''; } catch (e) {}
+    if (motivo === 'accessNotConfigured' || motivo === 'SERVICE_DISABLED') throw errore('api-spenta', 'La Google Drive API non è attiva nel progetto Google Cloud “Le mie app”: attivala in API e servizi → Libreria.');
+    throw errore(r.status === 403 ? 'vietato' : 'drive', `Google Drive non accetta la richiesta (${r.status}${motivo ? ', ' + motivo : ''}).`);
+  }
   return r;
 }
 
