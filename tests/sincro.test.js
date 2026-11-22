@@ -190,3 +190,48 @@ test('se Drive non risponde, l’errore si vede e i dati di qui restano com’er
   uguale([tel.s.stato().fase, titoli(tel)], ['errore', ['Uno']]);
   vero(tel.s.stato().errore.includes('connessione'));
 });
+
+gruppo('Sincronizzazione: accesso a Google con il ponte');
+import { creaAccesso, leggiRitorno } from '../js/sincro/google.js';
+const codifica = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+function posizioneFinta(hash) {
+  const p = { pathname: '/i-miei-libri/', search: '', hash, href: 'https://lelloclappato.github.io/i-miei-libri/' + hash, andata: null, assign(u) { p.andata = u; } };
+  const h = { state: null, replaceState(s, t, u) { p.hash = u.includes('#') ? u.slice(u.indexOf('#')) : ''; } };
+  return { p, h };
+}
+test('il risultato del ritorno da Google si legge e sparisce dall’indirizzo, la schermata resta', () => {
+  const { p, h } = posizioneFinta('#/altro&accesso-google=' + codifica({ access_token: 'A', expires_in: 3600, chiave: 'v1.x.y' }));
+  uguale(leggiRitorno(p, h).chiave, 'v1.x.y');
+  uguale(p.hash, '#/altro');
+  const senza = posizioneFinta('#accesso-google=' + codifica({ errore: 'annullato' }));
+  uguale(leggiRitorno(senza.p, senza.h), { errore: 'annullato' });
+  uguale(senza.p.hash, '');
+  uguale(leggiRitorno(posizioneFinta('#/oggi').p, posizioneFinta('#/oggi').h), null);
+});
+test('con il permesso lungo l’accesso scaduto si rinnova da solo; se Google l’ha revocato si torna al tocco', async () => {
+  const dep = depositoFinto();
+  dep.setItem('lelloclappato-google', JSON.stringify({ token: 'vecchio', scade: 0, email: 'g@example.com', chiave: 'v1.buona' }));
+  const fetchVero = globalThis.fetch; const chiamate = [];
+  globalThis.fetch = async (url, o) => {
+    chiamate.push(url);
+    const c = JSON.parse(o.body);
+    return c.chiave === 'v1.buona' ? new Response(JSON.stringify({ access_token: 'nuovo', expires_in: 3600 })) : new Response(JSON.stringify({ errore: 'revocato' }), { status: 401 });
+  };
+  try {
+    const a = creaAccesso({ clientId: 'x', ponte: 'https://ponte.example', deposito: dep, posizione: posizioneFinta('').p });
+    vero(a.valido() && a.permessoLungo(), 'con il permesso lungo si è sempre pronti');
+    uguale(await a.token(), 'nuovo');
+    uguale(chiamate, ['https://ponte.example/rinnova']);
+    dep.setItem('lelloclappato-google', JSON.stringify({ token: 'vecchio', scade: 0, email: 'g@example.com', chiave: 'v1.revocata' }));
+    uguale(await a.token(), null);
+    vero(!a.permessoLungo() && !a.valido(), 'permesso revocato: dimenticato');
+  } finally { globalThis.fetch = fetchVero; }
+});
+test('senza permesso lungo, "Accedi" porta alla pagina del ponte con l’indirizzo di ritorno', async () => {
+  const { p } = posizioneFinta('#/altro');
+  const a = creaAccesso({ clientId: 'x', ponte: 'https://ponte.example', deposito: depositoFinto(), posizione: p });
+  a.token({ interattivo: true });
+  await aspetta(1);
+  const u = new URL(p.andata);
+  uguale([u.origin + u.pathname, u.searchParams.get('torna')], ['https://ponte.example/accedi', 'https://lelloclappato.github.io/i-miei-libri/#/altro']);
+});

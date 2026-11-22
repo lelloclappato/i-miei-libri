@@ -41,7 +41,11 @@ export function creaSincro({
   let registro = carica();
   let timer = null, inCorso = null, ancora = false, scrivendo = false;
   const ascoltatori = new Set();
-  let stato = { fase: faseIniziale(), ultima: registro.ultima || null, errore: '', email: accesso ? accesso.email() : '' };
+  // se la pagina è appena tornata da Google con un errore (es. accesso annullato), lo si mostra
+  const ritorno = accesso && accesso.ritorno ? accesso.ritorno() : null;
+  let stato = { fase: ritorno && ritorno.errore && !(accesso && accesso.collegato()) ? 'errore' : faseIniziale(), ultima: registro.ultima || null,
+    errore: ritorno && ritorno.errore ? ritorno.errore : '', email: accesso ? accesso.email() : '' };
+  let riprovato = false;
 
   function carica() {
     try {
@@ -116,12 +120,17 @@ export function creaSincro({
         await drive.scrivi(token, nomeFile, { ...finale, scritto: Date.now() }, files.length ? files[0].id : null);
         for (const f of files.slice(1)) { try { await drive.elimina(token, f.id); } catch (e) {} }
       }
-      registro.sincronizzato = true; registro.sporco = false; registro.ultima = Date.now();
+      registro.sincronizzato = true; registro.sporco = false; registro.ultima = Date.now(); riprovato = false;
       salva();
       aggiorna({ fase: 'pronto', ultima: registro.ultima, errore: '' });
     } catch (e) {
       salva();
-      if (e.codice === 'scaduto') { accesso.scaduto(); aggiorna({ fase: 'da-riconnettere', errore: '' }); }
+      if (e.codice === 'scaduto') {
+        accesso.scaduto();
+        // con il permesso lungo si riprova una volta da soli (l'accesso si rinnova senza chiedere niente)
+        if (accesso.permessoLungo && accesso.permessoLungo() && !riprovato) { riprovato = true; aggiorna({ fase: 'pronto', errore: '' }); programma(300); return stato; }
+        aggiorna({ fase: 'da-riconnettere', errore: '' });
+      }
       else aggiorna({ fase: 'errore', errore: e.message || 'Errore durante la sincronizzazione.' });
     }
     return stato;
@@ -140,6 +149,8 @@ export function creaSincro({
     stato: () => stato,
     ascolta(f) { ascoltatori.add(f); return () => ascoltatori.delete(f); },
     daInviare: () => !!registro.sporco,
+    // true = l'accesso si rinnova da solo (con il ponte); false = dura un'ora e poi serve un tocco
+    permessoLungo: () => !!(accesso && accesso.permessoLungo && accesso.permessoLungo()),
     dopoSalvataggio,
     sincronizza,
     // "Accedi con Google" e "Sincronizza adesso": vanno chiamate da un tocco (può aprirsi la finestra di Google)
