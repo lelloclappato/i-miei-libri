@@ -12,6 +12,7 @@ import { applicaTema } from './viste/altro.js';
 import { apriParola } from './pannelli/parola.js';
 import { apriAggiungiLibro } from './pannelli/libro-form.js';
 import { apriScansione, puoScansionare } from './pannelli/scansione.js';
+import { sincro, quandoArrivanoDati } from './sincronizzazione.js';
 // Le schermate: importarle basta a registrarle (ognuna chiama registraVista e registraAzioni).
 import './viste/oggi.js';
 import './viste/libreria.js';
@@ -111,6 +112,12 @@ setupPWA(() => { if (rotta().nome === 'altro' && !pannelloAperto()) render(); })
 segnaVisita();
 visita = numeroDiQui();
 render();
+
+// ---------- sincronizzazione con Google Drive (solo se collegata in Altro) ----------
+// quando arrivano dati dagli altri dispositivi si ridisegna (ma non sotto a un pannello aperto: si aspetta che si chiuda)
+quandoArrivanoDati(() => { applicaTema(); if (!pannelloAperto()) render(); });
+sincro.ascolta(() => { const n = rotta().nome; if ((n === 'altro' || n === 'oggi') && !pannelloAperto()) render(); });
+sincro.avvia();
 
 // Scorciatoie dall'icona dell'app (tenendola premuta): "Parola nuova" e "Scansiona un libro" aprono subito il pannello.
 const scorciatoia = new URLSearchParams(location.search).get('azione');

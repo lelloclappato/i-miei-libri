@@ -13,6 +13,7 @@ import { apriCapitolo } from '../pannelli/capitolo.js';
 import { apriParola } from '../pannelli/parola.js';
 import { apriCitazione } from '../pannelli/citazione.js';
 import { apriPersonaggio } from '../pannelli/personaggio.js';
+import { sincro } from '../sincronizzazione.js';
 import { apriRipasso } from '../pannelli/ripasso.js';
 import { apriGiudizio } from '../pannelli/giudizio.js';
 
@@ -144,6 +145,8 @@ function vista() {
 
   return `
     <header class="testata"><h1 class="titolo-pagina">${titolo}</h1></header>
+    ${sincro.stato().fase === 'da-riconnettere' ? `<div class="sincro-striscia"><span>${sincro.daInviare() ? 'Hai modifiche da sincronizzare.' : 'Sincronizza per vedere le novità dagli altri dispositivi.'}</span>
+      <button type="button" class="bottone bottone--secondario" data-azione="sincro-ora">${icona('ripeti')}Sincronizza</button></div>` : ''}
     ${soloInMemoria && !globalThis.__LIBRI_ANTEPRIMA__ ? '<p class="nota-avviso">Questo browser non lascia salvare i dati (succede in navigazione privata): quello che scrivi si perde chiudendo la pagina. Apri l’app in una finestra normale.</p>' : ''}
     ${corpo}
     ${ripasso ? `<section class="scheda invito" style="margin-top:12px">

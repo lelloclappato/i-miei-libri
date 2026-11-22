@@ -120,6 +120,31 @@ export function conferma(messaggio, { ok = 'Elimina', annulla = 'Annulla', detta
     d.showModal();
   });
 }
+// Come conferma, ma con più risposte possibili: scelte = [{ valore, testo, principale }].
+// Restituisce il valore scelto, oppure "annulla" (anche toccando fuori o chiudendo la finestra).
+export function scegli(messaggio, { dettaglio = '', scelte = [] } = {}) {
+  const d = document.getElementById('conferma');
+  if (d.open) d.close('annulla');
+  d.innerHTML = `
+    <p><b>${esc(messaggio)}</b>${dettaglio ? `<br><span class="tenue">${esc(dettaglio)}</span>` : ''}</p>
+    <div class="azioni azioni--colonna">
+      ${scelte.map(s => `<button type="button" class="bottone${s.principale ? '' : ' bottone--secondario'}" value="${esc(s.valore)}">${esc(s.testo)}</button>`).join('')}
+    </div>`;
+  return new Promise(risolvi => {
+    const tocco = e => {
+      const b = e.target.closest('button');
+      if (b) { d.close(b.value); return; }
+      const r = d.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close('annulla');
+    };
+    d.addEventListener('click', tocco);
+    d.addEventListener('close', () => { d.removeEventListener('click', tocco); fermaTocchi(); risolvi(d.returnValue || 'annulla'); d.innerHTML = ''; }, { once: true });
+    d.returnValue = 'annulla';
+    fermaTocchi();
+    d.showModal();
+  });
+}
+
 // Chiude la finestra di conferma come se si fosse risposto "no" (si usa quando cambia schermata).
 export function chiudiConferma() {
   const d = document.getElementById('conferma');

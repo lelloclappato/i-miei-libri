@@ -16,11 +16,11 @@ export function vero(valore, messaggio = '') {
   if (!valore) throw new Error(messaggio || 'atteso un valore vero, ottenuto ' + JSON.stringify(valore));
 }
 
-export function esegui() {
+export async function esegui() { // i test possono essere anche async
   let ok = 0;
   const righe = [];
   for (const t of tests) {
-    try { t.fn(); ok++; righe.push({ nome: t.nome, ok: true }); }
+    try { await t.fn(); ok++; righe.push({ nome: t.nome, ok: true }); }
     catch (e) { righe.push({ nome: t.nome, ok: false, errore: e.message }); }
   }
   const riepilogo = `${ok} di ${tests.length} test superati`;

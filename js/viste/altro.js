@@ -9,6 +9,7 @@ import { scarica } from './elementi.js';
 import { esportaBackup, chiediImport, giornoDellaCopia, annullaImport, salvaCopia } from '../backup.js';
 import { isInstallata, isIOS, puoInstallare, installa } from '../pwa.js';
 import { conferma } from '../pannelli/pannello.js';
+import { sincro } from '../sincronizzazione.js';
 
 // Applica il tema scelto: 'auto' segue il telefono, gli altri due lo forzano (vedi css/style.css).
 export function applicaTema() {
@@ -27,6 +28,35 @@ function installazione() {
     <div class="azioni" style="margin-top:12px"><button type="button" class="bottone" data-azione="installa">${icona('scarica')}Installa l’app</button></div>`;
   if (isIOS()) return '<p class="tenue">Su iPhone: apri questa pagina in Safari, tocca <b>Condividi</b> e poi <b>Aggiungi alla schermata Home</b>.</p>';
   return '<p class="tenue">Su Android: nel menu ⋮ di Chrome scegli <b>Installa app</b> (o <b>Aggiungi a schermata Home</b>). Poi si apre come un’app e funziona anche senza connessione.</p>';
+}
+
+// "oggi alle 19:40", "ieri alle 8:05", "il 3 novembre alle 21:10"
+export function quandoSincro(ms) {
+  const d = new Date(ms);
+  const ora = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const g = giorniTra(k, oggi());
+  return (g === 0 ? 'oggi' : g === 1 ? 'ieri' : ilGiorno(k, { annoSempre: false })) + ' alle ' + ora;
+}
+
+function sezioneSincro() {
+  if (!sincro.disponibile) return '';
+  const s = sincro.stato();
+  let corpo;
+  if (s.fase === 'spento') {
+    corpo = `<p class="tenue">Accedi con Google per avere gli stessi libri e appunti sul telefono e sul computer. I dati vanno in una cartella nascosta del tuo Google Drive, riservata a queste app: non vedono gli altri tuoi file.</p>
+      <div class="azioni" style="margin-top:12px"><button type="button" class="bottone" data-azione="sincro-collega">${icona('nuvola')}Accedi con Google</button></div>`;
+  } else {
+    const riga = s.fase === 'in-corso' ? `${icona('ripeti')}Sincronizzo…`
+      : s.fase === 'errore' ? `<span class="sincro-errore">${esc(s.errore)}</span>`
+      : s.fase === 'da-riconnettere' ? `${icona('orologio')}L’accesso a Google è scaduto (dura un’ora)${sincro.daInviare() ? ': ci sono modifiche da inviare' : ''}.`
+      : s.ultima ? `${icona('fatto')}Sincronizzato ${quandoSincro(s.ultima)}.` : '';
+    corpo = `${s.email ? `<p class="tenue">Collegato come <b>${esc(s.email)}</b>. Usa lo stesso account sugli altri dispositivi.</p>` : ''}
+      ${riga ? `<p class="sincro-stato" role="status">${riga}</p>` : ''}
+      <div class="azioni" style="margin-top:12px"><button type="button" class="bottone bottone--secondario" data-azione="sincro-ora" ${s.fase === 'in-corso' ? 'disabled' : ''}>${icona('ripeti')}Sincronizza adesso</button></div>
+      <button type="button" class="bottone-testo" data-azione="sincro-scollega" style="margin-top:6px">Scollega questo dispositivo</button>`;
+  }
+  return `<section class="scheda"><h2 class="titolo-scheda">Telefono e computer</h2>${corpo}</section>`;
 }
 
 function vista() {
@@ -56,6 +86,8 @@ function vista() {
       </div>
     </section>
 
+    ${sezioneSincro()}
+
     <section class="scheda">
       <h2 class="titolo-scheda">Sul telefono</h2>
       ${installazione()}
@@ -63,7 +95,7 @@ function vista() {
 
     <section class="scheda">
       <h2 class="titolo-scheda">Backup</h2>
-      <p class="tenue">Libri, riassunti, parole e citazioni stanno solo su questo dispositivo: se cambi telefono o cancelli i dati del browser li perdi. Il backup è un file da conservare altrove (Drive, email, computer).</p>
+      <p class="tenue">${sincro.stato().fase === 'spento' || !sincro.disponibile ? 'Libri, riassunti, parole e citazioni stanno solo su questo dispositivo: se cambi telefono o cancelli i dati del browser li perdi. ' : 'I dati sono anche sul tuo Google Drive, ma un backup in più non fa mai male. '}Il backup è un file da conservare altrove (Drive, email, computer).</p>
       <p style="margin-top:8px"><b>${quandoBackup}</b></p>
       <p class="tenue piccolo" style="margin-top:4px">Adesso: ${plurale(data.libri.length, 'libro', 'libri')}, ${plurale(nRiassunti, 'riassunto', 'riassunti')}, ${plurale(data.parole.length, 'parola', 'parole')}, ${plurale(nCitazioni, 'citazione', 'citazioni')}.</p>
       <div class="azioni" style="margin-top:12px">
@@ -99,6 +131,22 @@ function vista() {
 registraVista('altro', vista);
 
 registraAzioni({
+  'sincro-collega': async () => {
+    const s = await sincro.collega();
+    if (s.fase === 'pronto') avviso('Collegato: i dati sono sincronizzati');
+    else if (s.errore) avviso(s.errore, { errore: true, durata: 7000 });
+    render();
+  },
+  'sincro-ora': async () => {
+    const s = await sincro.collega();
+    if (s.fase === 'pronto') avviso('Sincronizzato');
+    else if (s.errore) avviso(s.errore, { errore: true, durata: 7000 });
+    render();
+  },
+  'sincro-scollega': async () => {
+    if (!(await conferma('Scollegare questo dispositivo da Google?', { ok: 'Scollega', dettaglio: 'I dati restano qui e sul tuo Drive, ma smettono di sincronizzarsi su questo dispositivo.' }))) return;
+    await sincro.scollega(); render(); avviso('Scollegato');
+  },
   'installa': () => installa(),
   'esporta-backup': () => esportaBackup(),
   'importa-backup': () => chiediImport(),

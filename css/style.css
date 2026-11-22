@@ -478,6 +478,8 @@ dialog { color: var(--inchiostro); }
 .conferma::backdrop { background: var(--velo); }
 .conferma p { margin-bottom: 18px; }
 .conferma .azioni > .bottone { flex: 1 1 110px; white-space: normal; }
+.conferma .azioni--colonna { flex-direction: column; }
+.conferma .azioni--colonna > .bottone { flex: none; width: 100%; }
 
 /* risultati della ricerca di un libro */
 .risultato { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; width: 100%; padding: 10px 0; border: 0; border-bottom: 1px solid var(--linea); background: none; text-align: left; }
@@ -584,3 +586,12 @@ body.con-timer #toast { bottom: calc(var(--barra-schede) + 62px + env(safe-area-
 .pallino-esito.esito--ce-l-hai { background: var(--letto); border-color: var(--letto); }
 .etichetta-esito { font-size: 13px; font-weight: 600; color: var(--tenue); white-space: nowrap; }
 #prepara-mercatino { margin-top: 22px; }
+
+/* ---------- sincronizzazione ---------- */
+.sincro-stato { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-weight: 600; }
+.sincro-stato .icona { width: 18px; height: 18px; flex: none; }
+.sincro-errore { color: var(--nastro); }
+/* in Oggi, quando l'accesso a Google è scaduto: una riga discreta per risincronizzare con un tocco */
+.sincro-striscia { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding: 8px 8px 8px 14px;
+  border: 1.5px dashed var(--linea-forte); border-radius: var(--raggio-piccolo); font-size: 15px; }
+.sincro-striscia .bottone { min-height: 40px; padding: 6px 14px; font-size: 15px; flex: none; }

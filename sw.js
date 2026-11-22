@@ -36,7 +36,7 @@ const FILES = [
   './js/viste/comune.js', './js/viste/elementi.js', './js/viste/oggi.js', './js/viste/libreria.js', './js/viste/libro.js',
   './js/viste/quaderno.js', './js/viste/statistiche.js', './js/viste/lettura.js', './js/viste/altro.js', './js/viste/mercatino.js',
   './js/pannelli/pannello.js', './js/pannelli/libro-form.js', './js/pannelli/giudizio.js', './js/pannelli/pagina.js',
-  './js/pannelli/capitolo.js', './js/pannelli/citazione.js', './js/pannelli/personaggio.js', './js/pannelli/parola.js', './js/pannelli/lettura-form.js', './js/pannelli/ripasso.js', './js/pannelli/scansione.js'
+  './js/pannelli/capitolo.js', './js/pannelli/citazione.js', './js/pannelli/personaggio.js', './js/sincronizzazione.js', './js/sincro/sincro.js', './js/sincro/registro.js', './js/sincro/google.js', './js/sincro/drive.js', './js/pannelli/parola.js', './js/pannelli/lettura-form.js', './js/pannelli/ripasso.js', './js/pannelli/scansione.js'
 ];
 // (I file in vendor/ non sono in elenco: pesano qualche MB e non servono a tutti. Si scaricano la prima volta
 // che servono, o con "Prepara per il mercatino", e restano nella cache VENDOR: vedi sopra.)

@@ -52,10 +52,15 @@ export function quandoNonSalva(fn) { avvisaErrore = fn; }
 // L'ultimo salvataggio è andato a buon fine? Le schermate lo chiedono prima di dire "Salvato".
 let ultimoRiuscito = true;
 export function salvataggioRiuscito() { return ultimoRiuscito; }
+// Dopo ogni salvataggio riuscito: lo usa la sincronizzazione per accorgersi di cosa è cambiato (vedi sincronizzazione.js).
+let dopoSalvataggio = () => {};
+export function quandoSalva(fn) { dopoSalvataggio = fn; }
 
 export function save() {
-  try { deposito.setItem(STORE, JSON.stringify(data)); ultimoRiuscito = true; return true; }
+  try { deposito.setItem(STORE, JSON.stringify(data)); ultimoRiuscito = true; }
   catch (e) { ultimoRiuscito = false; avvisaErrore(); return false; }
+  try { dopoSalvataggio(); } catch (e) { /* la sincronizzazione non deve mai impedire di salvare */ }
+  return true;
 }
 
 // ---------- libri ----------

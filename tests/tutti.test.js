@@ -6,5 +6,6 @@ import './rete.test.js';
 import './dati.test.js';
 import './consigli.test.js';
 import './mercatino.test.js';
+import './sincro.test.js';
 
 esegui();
