@@ -135,7 +135,10 @@ export default {
       const errore = url.searchParams.get('error');
       if (errore) return vaiA(conRisultato(stato.torna, { errore: errore === 'access_denied' ? 'annullato' : 'google' }));
       const { ok, j } = await chiediToken({ code: url.searchParams.get('code') || '', grant_type: 'authorization_code', redirect_uri: ritorno }, env);
-      if (!ok || !j.access_token) return vaiA(conRisultato(stato.torna, { errore: 'google' }));
+      if (!ok || !j.access_token) {
+        console.log('scambio non riuscito', j.error || '', j.error_description || ''); // si vede nei registri del Worker (nessun dato personale)
+        return vaiA(conRisultato(stato.torna, { errore: 'google', dettaglio: String(j.error || '') + ' ' + String(j.error_description || '') }));
+      }
       return vaiA(conRisultato(stato.torna, {
         access_token: j.access_token, expires_in: j.expires_in, scope: j.scope || '',
         chiave: j.refresh_token ? await cifra(env.GOOGLE_CLIENT_SECRET, j.refresh_token) : null

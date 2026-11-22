@@ -80,7 +80,7 @@ export function creaAccesso({ clientId, ponte = PONTE, deposito = globalThis.loc
       const s = salvato();
       scrivi(deposito, { email: s.email || '', token: r.access_token, scade: Date.now() + (Number(r.expires_in) || 3600) * 1000, chiave: r.chiave || s.chiave || null });
       ritorno = { ok: true, senzaPermessoLungo: !r.chiave && !s.chiave };
-    } else ritorno = { errore: r.errore === 'annullato' ? 'Accesso annullato.' : 'Google non ha completato l’accesso: riprova.' };
+    } else ritorno = { errore: r.errore === 'annullato' ? 'Accesso annullato.' : 'Google non ha completato l’accesso: riprova.' + (r.dettaglio && r.dettaglio.trim() ? ` (${String(r.dettaglio).trim().slice(0, 160)})` : '') };
   }
 
   async function conEmail(token) {
