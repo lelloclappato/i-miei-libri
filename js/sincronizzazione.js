@@ -8,7 +8,7 @@ import { scegli } from './pannelli/pannello.js';
 
 // L'"ID client OAuth" del progetto Google Cloud "Le mie app" (è pubblico: identifica l'app, non dà accesso a niente).
 // Vuoto = niente sincronizzazione: l'app funziona come prima, solo sul dispositivo.
-export const GOOGLE_CLIENT_ID = '';
+export const GOOGLE_CLIENT_ID = '494586901323-p0t3hln8h1rjg8jqhh4a9frl0ncap7h3.apps.googleusercontent.com';
 
 // Cosa si sincronizza. Resta solo su questo dispositivo: il giorno dell'ultimo backup.
 export const SCHEMA = {
